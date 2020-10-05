@@ -1,9 +1,12 @@
 import argparse
+import torch
 from opacus import PrivacyEngine
-from dataloader import train_loader, test_loader
+from torch.utils.data import Dataset, DataLoader
+from torchvision import transforms
+from data import dataset, train_sampler, test_sampler
 from dp_sgd import logistic_regression
-from train import train
-from test import test
+from train import run_train
+from test import run_test
 
 
 def main():
@@ -98,6 +101,18 @@ def main():
    
 
     run_results = []
+
+    train_loader = DataLoader(dataset=dataset,
+                              sampler=train_sampler,
+                              batch_size=args.batch_size,
+                              )
+
+    test_loader = DataLoader(dataset=dataset,
+                             sampler=test_sampler,
+                             batch_size=args.batch_size,
+                             )
+
+
     for _ in range(args.n_runs):
         model = logistic_regression().to(device)
 

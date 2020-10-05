@@ -6,7 +6,7 @@ import torch.optim as optim
 from torchvision import datasets, transforms
 from tqdm import tqdm
 
-def test(args, model, device, test_loader):
+def run_test(args, model, device, test_loader):
     model.eval()
     criterion = nn.CrossEntropyLoss()
     test_loss = 0

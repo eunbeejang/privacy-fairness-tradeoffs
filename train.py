@@ -6,7 +6,7 @@ import torch.optim as optim
 from torchvision import datasets, transforms
 from tqdm import tqdm
 
-def train(args, model, device, train_loader, optimizer, epoch):
+def run_train(args, model, device, train_loader, optimizer, epoch):
     model.train()
     criterion = nn.CrossEntropyLoss()
     losses = []
