@@ -18,12 +18,14 @@ def run_test(args, model, test_loader, dataset_size, train_size, test_size):
             pred = output.argmax(
                 dim=1, keepdim=True
             )  # get the index of the max log-probability
+            print(output)
             correct += pred.eq(target.view_as(pred)).sum().item()
+            print("** ", pred.eq(target.view_as(pred)).sum().item())
 
     test_loss /= test_size
 
     print(
-        "\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)\n".format(
+        "\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.4f}%)\n".format(
             test_loss,
             correct,
             test_size,

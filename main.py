@@ -8,7 +8,7 @@ import numpy as np
 from dp_sgd import logistic_regression
 from train import run_train
 from test import run_test
-from data import BankDataset
+from data import BankDataset, make_weights_for_balanced_classes
 
 
 def main():
@@ -18,9 +18,9 @@ def main():
         "-b",
         "--batch-size",
         type=int,
-        default=64,
+        default=128,
         metavar="B",
-        help="input batch size for training (default: 64)",
+        help="input batch size for training (default: 128)",
     )
     parser.add_argument(
         "--test-batch-size",
@@ -33,24 +33,22 @@ def main():
         "-n",
         "--epochs",
         type=int,
-        default=10,
+        default=20,
         metavar="N",
-        help="number of epochs to train (default: 10)",
+        help="number of epochs to train (default: 20)",
     )
     parser.add_argument(
         "-s",
         "--split",
         type=float,
-        default=.2,
-        metavar="S",
-        help="test split ratio (default: .2)",
+        default=.1,
+        help="test split ratio (default: .1)",
     )
     parser.add_argument(
         "-r",
         "--n-runs",
         type=int,
         default=1,
-        metavar="R",
         help="number of runs to average on (default: 1)",
     )
     parser.add_argument(
@@ -125,26 +123,33 @@ def main():
     np.random.seed(random_seed)
     np.random.shuffle(indices)
     train_indices, test_indices = indices[split:], indices[:split]
-    train_size = dataset_size * (1 - args.split)
-    test_size = dataset_size * args.split
+    train_size = int(dataset_size * (1 - args.split))
+    test_size = int(dataset_size * args.split)
     num_var = dataset.X.shape[1]
 
     # Creating PT data samplers and loaders:
+    """
+    COMBINE SUBSET & WEIGHT SAMPLERS
     train_sampler = SubsetRandomSampler(train_indices)
     test_sampler = SubsetRandomSampler(test_indices)
+    
+    weights = make_weights_for_balanced_classes(dataset_train.imgs, len(dataset_train.classes))
+    weights = torch.DoubleTensor(weights)
+    sampler = torch.utils.data.sampler.WeightedRandomSampler(weights, len(weights))
+    """
 
-    print("\nDATASET SIZE:\t{}\n TRAIN SET:\t{}\n TEST SET:\t{}".format(
+    print("\nDATASET SIZE:\t{}\nTRAIN SET:\t{}\nTEST SET:\t{}".format(
         dataset_size, train_size, test_size))
 
     train_loader = DataLoader(dataset=dataset,
                               sampler=train_sampler,
                               batch_size=args.batch_size,
-                              drop_last = True)
+                              drop_last = False)
 
     test_loader = DataLoader(dataset=dataset,
                              sampler=test_sampler,
                              batch_size=args.batch_size,
-                             drop_last = True)
+                             drop_last = False)
 
 
     for _ in range(args.n_runs):
