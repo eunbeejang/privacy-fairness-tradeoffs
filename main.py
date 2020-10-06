@@ -5,7 +5,7 @@ from torch.utils.data import DataLoader
 from torch.utils.data.sampler import SubsetRandomSampler
 import torch.optim as optim
 import numpy as np
-from dp_sgd import logistic_regression
+from model import logistic_regression
 from train import run_train
 from test import run_test
 from data import BankDataset, make_weights_for_balanced_classes
@@ -130,6 +130,8 @@ def main():
     # Creating PT data samplers and loaders:
     """
     COMBINE SUBSET & WEIGHT SAMPLERS
+    https://discuss.pytorch.org/t/dataloader-using-subsetrandomsampler-and-weightedrandomsampler-at-the-same-time/29907/2
+    
     train_sampler = SubsetRandomSampler(train_indices)
     test_sampler = SubsetRandomSampler(test_indices)
     
@@ -137,6 +139,7 @@ def main():
     weights = torch.DoubleTensor(weights)
     sampler = torch.utils.data.sampler.WeightedRandomSampler(weights, len(weights))
     """
+
 
     print("\nDATASET SIZE:\t{}\nTRAIN SET:\t{}\nTEST SET:\t{}".format(
         dataset_size, train_size, test_size))
@@ -184,7 +187,7 @@ def main():
         f"{model.name()}_{args.lr}_{args.sigma}_"
         f"{args.max_per_sample_grad_norm}_{args.batch_size}_{args.epochs}"
     )
-    torch.save(run_results, f"./out/run_results_{repro_str}.out")
+    torch.save(run_results, f"./saved_outputs/run_results_{repro_str}.out")
 
     if args.save_model:
         torch.save(model.state_dict(), f"./saved_models/BANK_logistic_{repro_str}.model")

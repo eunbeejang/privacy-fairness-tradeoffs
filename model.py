@@ -2,12 +2,6 @@
 import torch.nn as nn
 from torch import sigmoid
 
-"""
-Get mean from baseline
-MEAN = 
-STD = 
-"""
-
 
 class logistic_regression(nn.Module):
     def __init__(self, emb_size):
