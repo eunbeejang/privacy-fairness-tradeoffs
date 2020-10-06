@@ -1,12 +1,14 @@
 import argparse
 import torch
 from opacus import PrivacyEngine
-from torch.utils.data import Dataset, DataLoader
-from torchvision import transforms
-from data import dataset, train_sampler, test_sampler
+from torch.utils.data import DataLoader
+from torch.utils.data.sampler import SubsetRandomSampler
+import torch.optim as optim
+import numpy as np
 from dp_sgd import logistic_regression
 from train import run_train
 from test import run_test
+from data import BankDataset
 
 
 def main():
@@ -33,7 +35,15 @@ def main():
         type=int,
         default=10,
         metavar="N",
-        help="number of epochs to train (default: 14)",
+        help="number of epochs to train (default: 10)",
+    )
+    parser.add_argument(
+        "-s",
+        "--split",
+        type=float,
+        default=.2,
+        metavar="S",
+        help="test split ratio (default: .2)",
     )
     parser.add_argument(
         "-r",
@@ -72,12 +82,14 @@ def main():
         metavar="D",
         help="Target delta (default: 1e-5)",
     )
+    """
     parser.add_argument(
         "--device",
         type=str,
         default="cuda",
         help="GPU ID for this process (default: 'cuda')",
     )
+    """
     parser.add_argument(
         "--save-model",
         action="store_true",
@@ -93,29 +105,51 @@ def main():
     parser.add_argument(
         "--data-root",
         type=str,
-        default="../BANK",
-        help="Where BANK is/will be stored",
+        default="./bank-data/bank-additional-full.csv",
+        help="Where BANK_DATASET is/will be stored",
     )
     args = parser.parse_args()
-    device = torch.device(args.device)
+#    device = torch.device(args.device)
    
 
     run_results = []
 
+    dataset = BankDataset(args.data_root)
+
+    # Creating data indices for training and validation splits:
+    random_seed = 42
+
+    dataset_size = len(dataset)
+    indices = list(range(dataset_size))
+    split = int(np.floor(args.split * dataset_size))
+    np.random.seed(random_seed)
+    np.random.shuffle(indices)
+    train_indices, test_indices = indices[split:], indices[:split]
+    train_size = dataset_size * (1 - args.split)
+    test_size = dataset_size * args.split
+    num_var = dataset.X.shape[1]
+
+    # Creating PT data samplers and loaders:
+    train_sampler = SubsetRandomSampler(train_indices)
+    test_sampler = SubsetRandomSampler(test_indices)
+
+    print("\nDATASET SIZE:\t{}\n TRAIN SET:\t{}\n TEST SET:\t{}".format(
+        dataset_size, train_size, test_size))
+
     train_loader = DataLoader(dataset=dataset,
                               sampler=train_sampler,
                               batch_size=args.batch_size,
-                              )
+                              drop_last = True)
 
     test_loader = DataLoader(dataset=dataset,
                              sampler=test_sampler,
                              batch_size=args.batch_size,
-                             )
+                             drop_last = True)
 
 
     for _ in range(args.n_runs):
-        model = logistic_regression().to(device)
-
+#        model = logistic_regression().to(device)
+        model = logistic_regression(num_var)
         optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=0)
         if not args.disable_dp:
             privacy_engine = PrivacyEngine(
@@ -128,8 +162,11 @@ def main():
             )
             privacy_engine.attach(optimizer)
         for epoch in range(1, args.epochs + 1):
-            train(args, model, device, train_loader, optimizer, epoch)
-        run_results.append(test(args, model, device, test_loader))
+#            run_train(args, model, device, train_loader, optimizer, epoch)
+            run_train(args, model, train_loader, optimizer, epoch)
+#        run_results.append(run_test(args, model, device, test_loader))
+        run_results.append(run_test(args, model, test_loader, dataset_size, train_size, test_size))
+
 
     if len(run_results) > 1:
         print(
@@ -142,10 +179,10 @@ def main():
         f"{model.name()}_{args.lr}_{args.sigma}_"
         f"{args.max_per_sample_grad_norm}_{args.batch_size}_{args.epochs}"
     )
-    torch.save(run_results, f"run_results_{repro_str}.pt")
+    torch.save(run_results, f"./out/run_results_{repro_str}.out")
 
     if args.save_model:
-        torch.save(model.state_dict(), f"BANK_cnn_{repro_str}.pt")
+        torch.save(model.state_dict(), f"./saved_models/BANK_logistic_{repro_str}.model")
 
 
 if __name__ == "__main__":

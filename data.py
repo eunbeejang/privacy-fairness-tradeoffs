@@ -1,13 +1,12 @@
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset
 import torch
-from torch.utils.data.sampler import SubsetRandomSampler
 import pandas as pd
 import numpy as np
 
 
 class BankDataset(Dataset):
-    def __init__(self):
-        data = pd.read_csv('./bank-data/bank-additional-full.csv', sep=';')
+    def __init__(self, data_path):
+        data = pd.read_csv(data_path, sep=';')
         print("Dataset shape: ", data.shape)
         print("Check for NaNs: ", data.isnull().values.any())
         self.len = data.shape[0]
@@ -63,22 +62,4 @@ class BankDataset(Dataset):
         return self.len
 
 
-dataset = BankDataset()
 
-
-# Creating data indices for training and validation splits:
-batch_size = 16
-test_split = .2
-random_seed= 42
-
-validation_split = .2
-dataset_size = len(dataset)
-indices = list(range(dataset_size))
-split = int(np.floor(test_split * dataset_size))
-np.random.seed(random_seed)
-np.random.shuffle(indices)
-train_indices, test_indices = indices[split:], indices[:split]
-
-# Creating PT data samplers and loaders:
-train_sampler = SubsetRandomSampler(train_indices)
-test_sampler = SubsetRandomSampler(test_indices)
