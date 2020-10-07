@@ -3,12 +3,11 @@ import torch
 from opacus import PrivacyEngine
 import torch.optim as optim
 import numpy as np
-from model import MixedInputModel
-from train import run_train
-from test import run_test
-from data import train_loader, test_loader
+from model import RegressionModel
+from run_train import train
+from run_test import test
+from data import data_loader
 import data
-import math
 
 def main():
     # Training settings
@@ -79,14 +78,12 @@ def main():
         metavar="D",
         help="Target delta (default: 1e-5)",
     )
-    """
     parser.add_argument(
         "--device",
         type=str,
         default="cuda",
         help="GPU ID for this process (default: 'cuda')",
     )
-    """
     parser.add_argument(
         "--save-model",
         action="store_true",
@@ -106,44 +103,50 @@ def main():
         help="Where BANK_DATASET is/will be stored",
     )
     args = parser.parse_args()
-#    device = torch.device(args.device)
-   
+    device = torch.device(args.device)
 
+    dataset = data_loader(args)
+    train_data, test_data, cat_emb_size, num_conts = dataset.__getitem__()
+    train_size, test_size = dataset.__len__()
     run_results = []
 
-    for _ in range(args.n_runs):
-#        model = logistic_regression().to(device)
-
-        model = MixedInputModel(emb_szs=data.cat_emb_size,
-                            n_cont=data.num_conts,
+    for i in range(args.n_runs):
+        model = RegressionModel(emb_szs=cat_emb_size,
+                            n_cont=num_conts,
                             emb_drop=0.04,
                             out_sz=1,
                             szs=[1000, 500, 250],
                             drops=[0.001, 0.01, 0.01],
-                            y_range=(0, 1))
+                            y_range=(0, 1)).to(device)
+
         optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=0)
-#        optimizer = optim.Adam(model.parameters(), 1e-2)
+
         if not args.disable_dp:
             privacy_engine = PrivacyEngine(
                 model,
                 batch_size=args.batch_size,
-                sample_size=len(train_loader.dataset),
+                sample_size=train_size,
                 alphas=[1 + x / 10.0 for x in range(1, 100)] + list(range(12, 64)),
                 noise_multiplier=args.sigma,
                 max_grad_norm=args.max_per_sample_grad_norm,
+                secure_rng=False,
             )
             privacy_engine.attach(optimizer)
+
+        if i == 0: # print model properties
+            print(model, '\n')g
+
+        print("\n=== RUN # {} ====================================\n".format(i))
+
         for epoch in range(1, args.epochs + 1):
-#            run_train(args, model, device, train_loader, optimizer, epoch)
-            run_train(args, model, train_loader, optimizer, epoch)
-#        run_results.append(run_test(args, model, device, test_loader))
-        run_results.append(run_test(args, model, test_loader, 8238))
+            train(args, model, device, train_data, optimizer, epoch)
+        run_results.append(test(args, model, device, test_data, test_size))
 
 
     if len(run_results) > 1:
         print(
             "Accuracy averaged over {} runs: {:.2f}% ± {:.2f}%".format(
-                len(run_results), np.mean(run_results) * 100, np.std(run_results) * 100
+                len(run_results), np.mean(run_results), np.std(run_results)
             )
         )
 
