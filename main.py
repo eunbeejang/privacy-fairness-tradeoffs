@@ -1,15 +1,14 @@
 import argparse
 import torch
 from opacus import PrivacyEngine
-from torch.utils.data import DataLoader
-from torch.utils.data.sampler import SubsetRandomSampler
 import torch.optim as optim
 import numpy as np
-from model import logistic_regression
+from model import MixedInputModel
 from train import run_train
 from test import run_test
-from data import BankDataset, make_weights_for_balanced_classes
-
+from data import train_loader, test_loader
+import data
+import math
 
 def main():
     # Training settings
@@ -112,53 +111,18 @@ def main():
 
     run_results = []
 
-    dataset = BankDataset(args.data_root)
-
-    # Creating data indices for training and validation splits:
-    random_seed = 42
-
-    dataset_size = len(dataset)
-    indices = list(range(dataset_size))
-    split = int(np.floor(args.split * dataset_size))
-    np.random.seed(random_seed)
-    np.random.shuffle(indices)
-    train_indices, test_indices = indices[split:], indices[:split]
-    train_size = int(dataset_size * (1 - args.split))
-    test_size = int(dataset_size * args.split)
-    num_var = dataset.X.shape[1]
-
-    # Creating PT data samplers and loaders:
-    """
-    COMBINE SUBSET & WEIGHT SAMPLERS
-    https://discuss.pytorch.org/t/dataloader-using-subsetrandomsampler-and-weightedrandomsampler-at-the-same-time/29907/2
-    
-    train_sampler = SubsetRandomSampler(train_indices)
-    test_sampler = SubsetRandomSampler(test_indices)
-    
-    weights = make_weights_for_balanced_classes(dataset_train.imgs, len(dataset_train.classes))
-    weights = torch.DoubleTensor(weights)
-    sampler = torch.utils.data.sampler.WeightedRandomSampler(weights, len(weights))
-    """
-
-
-    print("\nDATASET SIZE:\t{}\nTRAIN SET:\t{}\nTEST SET:\t{}".format(
-        dataset_size, train_size, test_size))
-
-    train_loader = DataLoader(dataset=dataset,
-                              sampler=train_sampler,
-                              batch_size=args.batch_size,
-                              drop_last = False)
-
-    test_loader = DataLoader(dataset=dataset,
-                             sampler=test_sampler,
-                             batch_size=args.batch_size,
-                             drop_last = False)
-
-
     for _ in range(args.n_runs):
 #        model = logistic_regression().to(device)
-        model = logistic_regression(num_var)
+
+        model = MixedInputModel(emb_szs=data.cat_emb_size,
+                            n_cont=data.num_conts,
+                            emb_drop=0.04,
+                            out_sz=1,
+                            szs=[1000, 500, 250],
+                            drops=[0.001, 0.01, 0.01],
+                            y_range=(0, 1))
         optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=0)
+#        optimizer = optim.Adam(model.parameters(), 1e-2)
         if not args.disable_dp:
             privacy_engine = PrivacyEngine(
                 model,
@@ -173,7 +137,7 @@ def main():
 #            run_train(args, model, device, train_loader, optimizer, epoch)
             run_train(args, model, train_loader, optimizer, epoch)
 #        run_results.append(run_test(args, model, device, test_loader))
-        run_results.append(run_test(args, model, test_loader, dataset_size, train_size, test_size))
+        run_results.append(run_test(args, model, test_loader, 8238))
 
 
     if len(run_results) > 1:

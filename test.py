@@ -4,23 +4,19 @@ import torch.nn as nn
 from tqdm import tqdm
 
 #def run_test(args, model, device, test_loader):
-def run_test(args, model, test_loader, dataset_size, train_size, test_size):
+def run_test(args, model, test_loader, test_size):
     model.eval()
     criterion = nn.BCELoss()
     test_loss = 0
     correct = 0
     with torch.no_grad():
-        for data, target in tqdm(test_loader):
+        for cats, conts, target in tqdm(test_loader):
 #            data, target = data.to(device), target.to(device)
-            data, target = data, target.float().view(-1,1)
-            output = model(data.float())
+            cats, conts, target = cats, conts, target.float().view(-1,1)
+            output = model(cats, conts.float())
             test_loss += criterion(output, target).item()  # sum up batch loss
-            pred = output.argmax(
-                dim=1, keepdim=True
-            )  # get the index of the max log-probability
-            print(output)
-            correct += pred.eq(target.view_as(pred)).sum().item()
-            print("** ", pred.eq(target.view_as(pred)).sum().item())
+            correct += output.eq(target.view_as(output)).sum().item()
+            #print("** ", pred.eq(target.view_as(pred)).sum().item())
 
     test_loss /= test_size
 

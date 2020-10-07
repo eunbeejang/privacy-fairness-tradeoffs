@@ -7,11 +7,11 @@ def run_train(args, model, train_loader, optimizer, epoch):
     model.train()
     criterion = nn.BCELoss()
     losses = []
-    for _batch_idx, (data, target) in enumerate(tqdm(train_loader)):
+    for _batch_idx, (cats, conts, target) in enumerate(tqdm(train_loader)):
 #        data, target = data.to(device), target.to(device)
-        data, target = data, target.float()
+        cats, conts, target = cats, conts, target.float()
         optimizer.zero_grad()
-        output = model(data.float()).flatten()
+        output = model(cats, conts.float())
         loss = criterion(output, target)
         loss.backward()
         optimizer.step()
