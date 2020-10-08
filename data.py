@@ -9,7 +9,7 @@ pd.set_option('mode.chained_assignment', None)
 class data_loader():
     def __init__(self, args):
         data_path = args.data_root
-        data = pd.read_csv(data_path, sep=';')
+        data = pd.read_csv(data_path)
         data = data.sample(frac=1).reset_index(drop=True)
         train_df, test_df = train_test_split(data, test_size=0.2, random_state=42, shuffle=True)
 

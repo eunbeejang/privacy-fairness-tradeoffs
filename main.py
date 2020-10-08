@@ -134,7 +134,7 @@ def main():
             privacy_engine.attach(optimizer)
 
         if i == 0: # print model properties
-            print(model, '\n')g
+            print(model, '\n')
 
         print("\n=== RUN # {} ====================================\n".format(i))
 
