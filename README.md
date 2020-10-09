@@ -1,7 +1,7 @@
 # privacy-fairness-tradeoffs
 
 
-### Arguments options in `main.py`
+#### Arguments options in `main.py`
 ```
 BANK Dataset
 
@@ -27,7 +27,20 @@ optional arguments:
 ```
 
 
+#### Arguments options in `dp_data_synth.py`
+```
+DP Data Synthesizer - PriveBayes
 
+optional arguments:
+  -h, --help            show this help message and exit
+  -i INPUT_FILE, --input-file INPUT_FILE
+                        Path to input data
+  -o OUTPUT_DIR, --output-dir OUTPUT_DIR
+                        Path to input data
+
+```
+
+---
 
 ### Method 1: Original model with original data
 ```
