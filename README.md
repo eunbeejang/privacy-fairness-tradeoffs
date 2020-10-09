@@ -1,7 +1,7 @@
-## privacy-fairness-tradeoffs
+# privacy-fairness-tradeoffs
 
 
-# Arguments options in `main.py`
+### Arguments options in `main.py`
 ```
 BANK Dataset
 
@@ -29,12 +29,12 @@ optional arguments:
 
 
 
-# Method 1: Original model with original data
+### Method 1: Original model with original data
 ```
 python main.py --disable-dp
 ```
 
-# Method 2: Original model with differentially private data
+### Method 2: Original model with differentially private data
 ```
 # create synthetic data first
 python dp_data_synth.py
@@ -43,7 +43,7 @@ python dp_data_synth.py
 python main.py --data-root ./bank-data/synth/random_mode/sythetic_data.csv
 ```
 
-# Method 3: Noisy SGD
+### Method 3: Noisy SGD
 ```
 python main.py
 ```
