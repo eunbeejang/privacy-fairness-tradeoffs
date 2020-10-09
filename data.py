@@ -6,10 +6,11 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 pd.set_option('mode.chained_assignment', None)
 
+
 class data_loader():
     def __init__(self, args):
         data_path = args.data_root
-        data = pd.read_csv(data_path)
+        data = pd.read_csv(data_path, sep=';')
         data = data.sample(frac=1).reset_index(drop=True)
         train_df, test_df = train_test_split(data, test_size=0.2, random_state=42, shuffle=True)
 
@@ -53,9 +54,13 @@ class BankDataset(Dataset):
                              'previous', 'emp.var.rate', 'cons.price.idx',
                              'cons.conf.idx', 'euribor3m', 'nr.employed']
 
+        print(data.head)
+        print(data.dtypes)
+
         # categorical variables
         for category in categorical_columns:
             data[category] = data[category].astype('category')
+        print(data.dtypes)
 
         age = data['age'].cat.codes.values
         job = data['job'].cat.codes.values
@@ -89,7 +94,6 @@ class BankDataset(Dataset):
         self.categorical_embedding_sizes = [(col_size, min(50, (col_size + 1) // 2))
                                             for col_size in categorical_column_sizes]
         self.num_numerical_cols = self.numerical_data.shape[1]
-
 
     def __getitem__(self, idx):
         return self.categorical_data[idx], self.numerical_data[idx].float(), self.Y[idx].float()
