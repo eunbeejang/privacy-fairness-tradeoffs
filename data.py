@@ -5,6 +5,8 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 pd.set_option('mode.chained_assignment', None)
+import fairlearn.metrics as flm
+import sklearn.metrics as skm
 
 
 class data_loader():
@@ -12,6 +14,8 @@ class data_loader():
         data_path = args.data_root
         data = pd.read_csv(data_path, sep=';')
         data = data.sample(frac=1).reset_index(drop=True)
+
+
         train_df, test_df = train_test_split(data, test_size=0.2, random_state=42, shuffle=True)
 
         train_data = BankDataset(train_df)
