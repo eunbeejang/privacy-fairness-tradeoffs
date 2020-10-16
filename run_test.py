@@ -35,12 +35,12 @@ def test(args, model, device, test_loader, test_size):
 
 
             # Fairness metrics
-            """
+
             group_metrics = flm.group_summary(skm.recall_score,
                                              target, pred,
                                               sensitive_features=sensitive,
                                               sample_weight=None)
-            """
+
 
             eq_odds_ratio = flm.equalized_odds_ratio(target, pred,
                                               sensitive_features=sensitive,
@@ -50,12 +50,13 @@ def test(args, model, device, test_loader, test_size):
                                               sensitive_features=sensitive,
                                               sample_weight=None)
 
-            #avg_recall += group_metrics.overall
-            #avg_recall_by_group = dict(Counter(avg_recall_by_group)+Counter(group_metrics.by_group))
+            #print("\n", group_metrics.by_group, "\n")
+            avg_recall += group_metrics.overall
+            avg_recall_by_group = dict(Counter(avg_recall_by_group)+Counter(group_metrics.by_group))
             avg_eq_odds += eq_odds_ratio
             avg_dem_par += demographic_ratio
 
-    print("======= ", i)
+
 
 
     test_loss /= test_size
@@ -73,12 +74,11 @@ def test(args, model, device, test_loader, test_size):
         """
         \nTest set: Average fairness score:\n
         Overall recall: {:.4f}, 
-        Recall by Group: {:.4f}, 
+        Recall by Group: {}, 
         Equalized Odds Ratio: {:.4f}, 
         Demographic Parity Ratio: {:.4f} \n""".format(
-            #avg_recall/i,
-            #{k: v / i for k, v in avg_recall_by_group.iteritems()},
-            0,0,
+            avg_recall/i,
+            {k: v / i for k, v in avg_recall_by_group.items()},
             avg_eq_odds/i,
             avg_dem_par/i,
         )
