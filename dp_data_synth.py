@@ -19,7 +19,7 @@ def main():
         "-o",
         "--output-dir",
         type=str,
-        default="./bank-data/synth/random_mode/",
+        default="./bank-data/synth/",
         help="Path to input data",
     )
     args = parser.parse_args()
@@ -39,11 +39,48 @@ def main():
     # Number of tuples generated in synthetic dataset.
     num_tuples_to_generate = len(df)
 
+    # specify categorical attributes
+    categorical_attributes = {'age':True,
+                              'job':True,
+                              'marital':True,
+                              'education':True,
+                              'default':True,
+                              'housing':True,
+                              'loan':True,
+                              'contact':True,
+                              'month':True,
+                              'day_of_week':True,
+                              'poutcome':True,
+                              'y':True
+                              }
+
+    # specify which attributes are candidate keys of input dataset.
+    candidate_keys = {'y': 'yes'}
+
+
+    # Increase epsilon value to reduce the injected noises. Set epsilon=0 to turn off differential privacy.
+    epsilon = 1
+
+    # The maximum number of parents in Bayesian network, i.e., the maximum number of incoming edges.
+    degree_of_bayesian_network = 2
+
+    # Number of tuples generated in synthetic dataset.
+    num_tuples_to_generate = len(df)
 
     # Data describer
     describer = DataDescriber(category_threshold=threshold_value)
+    describer.describe_dataset_in_correlated_attribute_mode(dataset_file=input_data,
+                                                            epsilon=epsilon,
+                                                            k=degree_of_bayesian_network,
+                                                            attribute_to_is_categorical=categorical_attributes,
+                                                            attribute_to_is_candidate_key=candidate_keys)
+    describer.save_dataset_description_to_file(description_file)
+    """
+    describer = DataDescriber(category_threshold=threshold_value)
     describer.describe_dataset_in_random_mode(input_data)
     describer.save_dataset_description_to_file(description_file)
+    """
+    print(display_bayesian_network(describer.bayesian_network))
 
     # Generate synthetic dataset
     generator = DataGenerator()
@@ -66,6 +103,12 @@ def main():
     # Delete temporary file (comma separated df)
     if os.path.exists(input_data):
         os.remove(input_data)
+
+
+    synth_df = pd.read_csv(synthetic_data, sep=',')
+    synth_df['y'] = df['y']
+    save_path = args.output_dir + '/sythetic_data_ymod.csv'
+    synth_df.to_csv(save_path)
 
 if __name__ == "__main__":
     main()
