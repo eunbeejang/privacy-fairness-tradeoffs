@@ -1,6 +1,10 @@
 import numpy as np
 import torch.nn as nn
+import torch
 from tqdm import tqdm
+np.random.seed(0)
+torch.manual_seed(0)
+
 
 def train(args, model, device, train_loader, optimizer, epoch):
     model.train()

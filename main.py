@@ -23,7 +23,7 @@ def main():
     parser.add_argument(
         "--test-batch-size",
         type=int,
-        default=1024,
+        default=4119,
         metavar="TB",
         help="input batch size for testing (default: 1024)",
     )
@@ -52,7 +52,7 @@ def main():
     parser.add_argument(
         "--lr",
         type=float,
-        default=0.1,
+        default=.1,
         metavar="LR",
         help="learning rate (default: .1)",
     )
@@ -97,10 +97,16 @@ def main():
         help="Disable privacy training and just train with vanilla SGD",
     )
     parser.add_argument(
-        "--data-root",
+        "--train-data-path",
         type=str,
         default="./bank-data/bank-additional-full.csv",
-        help="Where BANK_DATASET is/will be stored",
+        help="path to BANK data (train)",
+    )
+    parser.add_argument(
+        "--test-data-path",
+        type=str,
+        default="./bank-data/bank-additional.csv",
+        help="path to BANK data (test)",
     )
     args = parser.parse_args()
     device = torch.device(args.device)
@@ -119,7 +125,8 @@ def main():
                             drops=[0.001, 0.01, 0.01],
                             y_range=(0, 1)).to(device)
 
-        optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=0)
+#        optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=0)
+        optimizer = optim.SGD(model.parameters(), lr=args.lr)
 
         if not args.disable_dp:
             privacy_engine = PrivacyEngine(
@@ -140,7 +147,9 @@ def main():
 
         for epoch in range(1, args.epochs + 1):
             train(args, model, device, train_data, optimizer, epoch)
+
         run_results.append(test(args, model, device, test_data, test_size))
+
 
 
     if len(run_results) > 1:
@@ -149,7 +158,19 @@ def main():
                 len(run_results), np.mean(run_results), np.std(run_results)
             )
         )
+        """
+        cm = np.mean(run_results[1])
+        ax = plt.subplot()
+        sns.heatmap(cm, annot=True, ax=ax, annot_kws={"size": 5});  # annot=True to annotate cells
 
+        # labels, title and ticks
+        ax.set_xlabel('Predicted labels')
+        ax.set_ylabel('True labels')
+        ax.set_title('AVG Confusion Matrix')
+        ax.xaxis.set_ticklabels(['1', '0'])
+        ax.yaxis.set_ticklabels(['0', '1'])
+        plt.show()
+        """
     repro_str = (
         f"{model.name()}_{args.lr}_{args.sigma}_"
         f"{args.max_per_sample_grad_norm}_{args.batch_size}_{args.epochs}"
