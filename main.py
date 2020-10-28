@@ -1,7 +1,6 @@
 import argparse
 import torch
 from opacus import PrivacyEngine
-import torch.optim as optim
 import numpy as np
 from model import RegressionModel
 from run_train import train
@@ -125,7 +124,7 @@ def main():
                             y_range=(0, 1)).to(device)
 
 #        optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=0)
-        optimizer = optim.SGD(model.parameters(), lr=args.lr)
+        optimizer = RegressionModel.configure_optimizers()
 
         if not args.disable_dp:
             privacy_engine = PrivacyEngine(

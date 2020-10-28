@@ -1,8 +1,14 @@
 import torch
 from torch import nn
 import torch.nn.functional as F
-m = nn.Sigmoid()
-class RegressionModel(nn.Module):
+import pytorch_lightning as pl
+import torch.optim as optim
+
+
+
+
+#class RegressionModel(nn.Module):
+class RegressionModel(pl.LightningModule):
     def __init__(self, emb_szs, n_cont, emb_drop, out_sz, szs, drops, y_range, use_bn=True):
         super().__init__()
 
@@ -28,6 +34,7 @@ class RegressionModel(nn.Module):
         self.drops = nn.ModuleList([nn.Dropout(drop) for drop in drops])
         self.bn = nn.GroupNorm(1,n_cont)
         self.use_bn, self.y_range = use_bn, y_range
+        self.activation = nn.Sigmoid()
 
     def forward(self, x_cat, x_cont):
         # embedding for categorical variables
@@ -48,15 +55,24 @@ class RegressionModel(nn.Module):
         # regression layer
         x = self.outp(x)
         if self.y_range:
-            x = m(x)
+            x = self.activation(x)
             x = x * (self.y_range[1] - self.y_range[0])
             x = x + self.y_range[0]
 #            x = torch.where(torch.isnan(x), torch.zeros_like(x), x)
 #            x = torch.where(torch.isinf(x), torch.zeros_like(x), x)
         return x.squeeze()
 
+    def configure_optimizers(self):
+        #        optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=0)
+        optimizer = optim.SGD(model.parameters(), lr=args.lr)
+        return optimizer
+
+    def BCELoss(self, output, target):
+        return nn.BCELoss()
+
     def name(self):
         return "RegressionModel"
+
 
 
 

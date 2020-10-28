@@ -1,14 +1,11 @@
 from torch.utils.data import Dataset, DataLoader
-from torch.utils.data.sampler import WeightedRandomSampler
+#from torch.utils.data.sampler import WeightedRandomSampler
 from sampler import BalancedBatchSampler
 import torch
 import pandas as pd
 import numpy as np
-from sklearn.model_selection import train_test_split
 pd.set_option('mode.chained_assignment', None)
-import fairlearn.metrics as flm
-import sklearn.metrics as skm
-import nonechucks as nc
+
 
 class data_loader():
     def __init__(self, args):
@@ -55,29 +52,38 @@ class data_loader():
         self.cat_emb_size = train_data.categorical_embedding_sizes # size of categorical embedding
         self.num_conts = train_data.num_numerical_cols # number of numerical variables
 
-        """
-        class_count = [i for i in get_class_distribution(train_data.y).values()]
-        class_weights = 1. / torch.tensor(class_count, dtype=torch.float)
-        """
+
 
         class_count = dict(train_df.y.value_counts())
         class_weights = [value / len(train_data) for _, value in class_count.items()]
 
+        train_batch = args.batch_size
+        test_batch = len(test_data)
+
         self.train_loader = DataLoader(dataset=train_data,
                                        sampler=BalancedBatchSampler(train_data, train_data.Y),
-                                       batch_size=args.batch_size)
-                                  #sampler=WeightedRandomSampler(class_weights, args.batch_size, replacement=True),
-                                  #drop_last=True)
+                                       batch_size=train_batch)
 
         self.test_loader = DataLoader(dataset=test_data,
-#                                      batch_size=args.test_batch_size,
-                                      batch_size=len(test_data),
+                                      batch_size=test_batch,
                                  drop_last=True)
+
+
+
+    def train_dataloader(self): # for PyTorch Lightening
+        return DataLoader(self.train_loader)
+
+
+    def test_dataloader(self): # for PyTorch Lightening
+        return DataLoader(self, test_loader)
+
+
     def __getitem__(self):
         return self.train_loader, self.test_loader, self.cat_emb_size, self.num_conts
 
     def __len__(self):
         return self.train_size, self.test_size
+
 
 
 class BankDataset(Dataset):
@@ -141,7 +147,8 @@ class BankDataset(Dataset):
             sex = data['sex'].cat.codes.values
             native_country = data['native-country'].cat.codes.values
 
-
+            cat_dict = dict(enumerate(data['education'].cat.categories))
+            print(cat_dict)
 
             categorical_data = np.stack([workclass, education, marital_status,
                                          occupation, relationship, race,

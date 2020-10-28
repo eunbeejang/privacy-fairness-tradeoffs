@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 def test(args, model, device, test_loader, test_size):
     #print("\n[[EVALUATION]]\n")
     model.eval()
-    criterion = nn.BCELoss()
+#    criterion = nn.BCELoss()
     test_loss = 0
     correct = 0
     i = 0
@@ -28,7 +28,8 @@ def test(args, model, device, test_loader, test_size):
             i += 1
             cats, conts, target = cats.to(device), conts.to(device), target.to(device)
             output = model(cats, conts)
-            test_loss += criterion(output, target).item()  # sum up batch loss
+#            test_loss += criterion(output, target).item()  # sum up batch loss
+            test_loss += model.BCELoss(output, target).item()
             pred = (output > 0.5).float()
             correct += pred.eq(target.view_as(pred)).sum().item()
 
