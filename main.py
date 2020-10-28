@@ -7,25 +7,24 @@ from model import RegressionModel
 from run_train import train
 from run_test import test
 from data import data_loader
-import data
 
 def main():
     # Training settings
-    parser = argparse.ArgumentParser(description="BANK Dataset")
+    parser = argparse.ArgumentParser(description="Measuring Privacy and Fairness Trade-offs")
     parser.add_argument(
         "-b",
         "--batch-size",
         type=int,
         default=128,
         metavar="B",
-        help="input batch size for training (default: 128)",
+        help="Input batch size for training (default: 128)",
     )
     parser.add_argument(
         "--test-batch-size",
         type=int,
         default=4119,
         metavar="TB",
-        help="input batch size for testing (default: 1024)",
+        help="Input batch size for testing (default: 1024)",
     )
     parser.add_argument(
         "-n",
@@ -33,28 +32,21 @@ def main():
         type=int,
         default=20,
         metavar="N",
-        help="number of epochs to train (default: 20)",
-    )
-    parser.add_argument(
-        "-s",
-        "--split",
-        type=float,
-        default=.1,
-        help="test split ratio (default: .1)",
+        help="Number of epochs to train (default: 20)",
     )
     parser.add_argument(
         "-r",
         "--n-runs",
         type=int,
         default=1,
-        help="number of runs to average on (default: 1)",
+        help="Number of runs to average on (default: 1)",
     )
     parser.add_argument(
         "--lr",
         type=float,
         default=.1,
         metavar="LR",
-        help="learning rate (default: .1)",
+        help="Learning rate (default: .1)",
     )
     parser.add_argument(
         "--sigma",
@@ -96,17 +88,24 @@ def main():
         default=False,
         help="Disable privacy training and just train with vanilla SGD",
     )
+
+    parser.add_argument(
+        "--dataset",
+        type=str,
+        default="bank",
+        help="Specify the dataset you want to test on. (bank: bank marketing, adult: adult census)",
+    )
     parser.add_argument(
         "--train-data-path",
         type=str,
         default="./bank-data/bank-additional-full.csv",
-        help="path to BANK data (train)",
+        help="Path to train data",
     )
     parser.add_argument(
         "--test-data-path",
         type=str,
         default="./bank-data/bank-additional.csv",
-        help="path to BANK data (test)",
+        help="Path to test data",
     )
     args = parser.parse_args()
     device = torch.device(args.device)
@@ -158,19 +157,7 @@ def main():
                 len(run_results), np.mean(run_results), np.std(run_results)
             )
         )
-        """
-        cm = np.mean(run_results[1])
-        ax = plt.subplot()
-        sns.heatmap(cm, annot=True, ax=ax, annot_kws={"size": 5});  # annot=True to annotate cells
 
-        # labels, title and ticks
-        ax.set_xlabel('Predicted labels')
-        ax.set_ylabel('True labels')
-        ax.set_title('AVG Confusion Matrix')
-        ax.xaxis.set_ticklabels(['1', '0'])
-        ax.yaxis.set_ticklabels(['0', '1'])
-        plt.show()
-        """
     repro_str = (
         f"{model.name()}_{args.lr}_{args.sigma}_"
         f"{args.max_per_sample_grad_norm}_{args.batch_size}_{args.epochs}"
@@ -178,7 +165,7 @@ def main():
     torch.save(run_results, f"./saved_outputs/run_results_{repro_str}.out")
 
     if args.save_model:
-        torch.save(model.state_dict(), f"./saved_models/BANK_logistic_{repro_str}.model")
+        torch.save(model.state_dict(), f"./saved_models/{args.dataset}_logistic_{repro_str}.model")
 
 
 if __name__ == "__main__":

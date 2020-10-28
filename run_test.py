@@ -49,7 +49,9 @@ def test(args, model, device, test_loader, test_size):
             plt.show()
             """
             # position of col for sensitive values
-            sensitive = [i[3].item() for i in cats]
+#            sensitive = [i[3].item() for i in cats]
+            sensitive = [i[1].item() for i in cats]
+
 
             # Fairness metrics
 
@@ -87,12 +89,13 @@ def test(args, model, device, test_loader, test_size):
     )
 
     print(
-        "\nTest set: Average fairness score:\nOverall recall: {:.4f}, \nRecall by Group: {}, \nEqualized Odds Ratio: {:.4f}, \nDemographic Parity Ratio: {:.4f} \n".format(
+        "\nTest set: Average fairness score:\nOverall recall: {:.4f}, \nRecall by Group: {}, \nEqualized Odds: {:.4f}, \nDemographic Parity: {:.4f} \n".format(
             avg_recall/i,
             #avg_recall_by_group,
             {k: v / i for k, v in avg_recall_by_group.items()},
             avg_eq_odds/i,
-            avg_dem_par[0]/i,
+#            avg_dem_par[0]/i,
+            avg_dem_par/i
         )
     )
     return 100.0 * correct / test_size

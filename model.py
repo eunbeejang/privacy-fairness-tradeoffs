@@ -1,14 +1,15 @@
 import torch
 from torch import nn
 import torch.nn.functional as F
-
+m = nn.Sigmoid()
 class RegressionModel(nn.Module):
     def __init__(self, emb_szs, n_cont, emb_drop, out_sz, szs, drops, y_range, use_bn=True):
         super().__init__()
 
         # embeddings
         for i, (c, s) in enumerate(emb_szs): assert c > 1, f"cardinality must be >=2, got emb_szs[{i}]: ({c},{s})"
-        self.embs = nn.ModuleList([nn.Embedding(c, s) for c, s in emb_szs])
+        self.embs = nn.ModuleList([nn.Embedding(c+1, s) for c, s in emb_szs])
+
         for emb in self.embs: emb_init(emb)
         n_emb = sum(e.embedding_dim for e in self.embs)
         self.n_emb, self.n_cont = n_emb, n_cont
@@ -47,9 +48,11 @@ class RegressionModel(nn.Module):
         # regression layer
         x = self.outp(x)
         if self.y_range:
-            x = torch.sigmoid(x)
+            x = m(x)
             x = x * (self.y_range[1] - self.y_range[0])
             x = x + self.y_range[0]
+#            x = torch.where(torch.isnan(x), torch.zeros_like(x), x)
+#            x = torch.where(torch.isinf(x), torch.zeros_like(x), x)
         return x.squeeze()
 
     def name(self):
