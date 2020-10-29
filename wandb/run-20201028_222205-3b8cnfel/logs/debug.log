@@ -1,0 +1,75 @@
+2020-10-28 22:22:05,636 INFO    MainThread:41339 [wandb_init.py:_log_setup():293] Logging user logs to wandb/run-20201028_222205-3b8cnfel/logs/debug.log
+2020-10-28 22:22:05,636 INFO    MainThread:41339 [wandb_init.py:_log_setup():294] Logging internal logs to wandb/run-20201028_222205-3b8cnfel/logs/debug-internal.log
+2020-10-28 22:22:05,636 INFO    MainThread:41339 [wandb_setup.py:_flush():69] setting env: {}
+2020-10-28 22:22:05,636 INFO    MainThread:41339 [wandb_setup.py:_flush():69] setting user settings: {'email': 'eunbee.jang@mail.mcgill.ca'}
+2020-10-28 22:22:05,636 INFO    MainThread:41339 [wandb_setup.py:_flush():69] multiprocessing start_methods=spawn,fork,forkserver
+2020-10-28 22:22:05,637 INFO    MainThread:41339 [wandb_init.py:init():326] wandb.init() called when a run is still active
+2020-10-28 22:22:13,777 INFO    MainThread:41339 [wandb_init.py:_log_setup():293] Logging user logs to wandb/run-20201028_222213-phqpsjz8/logs/debug.log
+2020-10-28 22:22:13,777 INFO    MainThread:41339 [wandb_init.py:_log_setup():294] Logging internal logs to wandb/run-20201028_222213-phqpsjz8/logs/debug-internal.log
+2020-10-28 22:22:13,777 INFO    MainThread:41339 [wandb_setup.py:_flush():69] setting env: {}
+2020-10-28 22:22:13,777 INFO    MainThread:41339 [wandb_setup.py:_flush():69] setting user settings: {'email': 'eunbee.jang@mail.mcgill.ca'}
+2020-10-28 22:22:13,777 INFO    MainThread:41339 [wandb_setup.py:_flush():69] multiprocessing start_methods=spawn,fork,forkserver
+2020-10-28 22:22:13,779 INFO    MainThread:41339 [wandb_init.py:init():326] wandb.init() called when a run is still active
+2020-10-28 22:22:22,070 INFO    MainThread:41339 [wandb_init.py:_log_setup():293] Logging user logs to wandb/run-20201028_222222-y5xh4iqs/logs/debug.log
+2020-10-28 22:22:22,070 INFO    MainThread:41339 [wandb_init.py:_log_setup():294] Logging internal logs to wandb/run-20201028_222222-y5xh4iqs/logs/debug-internal.log
+2020-10-28 22:22:22,070 INFO    MainThread:41339 [wandb_setup.py:_flush():69] setting env: {}
+2020-10-28 22:22:22,070 INFO    MainThread:41339 [wandb_setup.py:_flush():69] setting user settings: {'email': 'eunbee.jang@mail.mcgill.ca'}
+2020-10-28 22:22:22,070 INFO    MainThread:41339 [wandb_setup.py:_flush():69] multiprocessing start_methods=spawn,fork,forkserver
+2020-10-28 22:22:22,071 INFO    MainThread:41339 [wandb_init.py:init():326] wandb.init() called when a run is still active
+2020-10-28 22:22:30,248 INFO    MainThread:41339 [wandb_init.py:_log_setup():293] Logging user logs to wandb/run-20201028_222230-x5pxu5zo/logs/debug.log
+2020-10-28 22:22:30,248 INFO    MainThread:41339 [wandb_init.py:_log_setup():294] Logging internal logs to wandb/run-20201028_222230-x5pxu5zo/logs/debug-internal.log
+2020-10-28 22:22:30,248 INFO    MainThread:41339 [wandb_setup.py:_flush():69] setting env: {}
+2020-10-28 22:22:30,248 INFO    MainThread:41339 [wandb_setup.py:_flush():69] setting user settings: {'email': 'eunbee.jang@mail.mcgill.ca'}
+2020-10-28 22:22:30,248 INFO    MainThread:41339 [wandb_setup.py:_flush():69] multiprocessing start_methods=spawn,fork,forkserver
+2020-10-28 22:22:30,249 INFO    MainThread:41339 [wandb_init.py:init():326] wandb.init() called when a run is still active
+2020-10-28 22:22:37,816 INFO    MainThread:41339 [wandb_run.py:_atexit_cleanup():1263] got exitcode: 0
+2020-10-28 22:22:37,816 INFO    MainThread:41339 [wandb_run.py:_restore():1235] restore
+2020-10-28 22:22:37,816 INFO    MainThread:41339 [redirect.py:uninstall():215] uninstall start
+2020-10-28 22:22:37,816 INFO    MainThread:41339 [redirect.py:_stop():264] _stop: stdout
+2020-10-28 22:22:37,817 INFO    MainThread:41339 [redirect.py:_stop():270] _stop closed: stdout
+2020-10-28 22:22:37,817 INFO    stdout    :41339 [redirect.py:_pipe_relay():119] relay done saw last write: stdout
+2020-10-28 22:22:37,817 INFO    stdout    :41339 [redirect.py:_pipe_relay():135] relay done done: stdout
+2020-10-28 22:22:37,817 INFO    MainThread:41339 [redirect.py:_stop():276] _stop joined: stdout
+2020-10-28 22:22:37,817 INFO    MainThread:41339 [redirect.py:_stop():278] _stop rd closed: stdout
+2020-10-28 22:22:37,817 INFO    MainThread:41339 [redirect.py:uninstall():219] uninstall done
+2020-10-28 22:22:37,818 INFO    MainThread:41339 [redirect.py:uninstall():215] uninstall start
+2020-10-28 22:22:37,818 INFO    MainThread:41339 [redirect.py:_stop():264] _stop: stderr
+2020-10-28 22:22:37,818 INFO    MainThread:41339 [redirect.py:_stop():270] _stop closed: stderr
+2020-10-28 22:22:37,818 INFO    stderr    :41339 [redirect.py:_pipe_relay():119] relay done saw last write: stderr
+2020-10-28 22:22:37,818 INFO    stderr    :41339 [redirect.py:_pipe_relay():135] relay done done: stderr
+2020-10-28 22:22:37,818 INFO    MainThread:41339 [redirect.py:_stop():276] _stop joined: stderr
+2020-10-28 22:22:37,818 INFO    MainThread:41339 [redirect.py:_stop():278] _stop rd closed: stderr
+2020-10-28 22:22:37,818 INFO    MainThread:41339 [redirect.py:uninstall():219] uninstall done
+2020-10-28 22:22:37,822 INFO    MainThread:41339 [wandb_run.py:_wait_for_finish():1377] got exit ret: uuid: "681024a8007e4a1c8b05b151c891212a"
+response {
+  poll_exit_response {
+    file_counts {
+      wandb_count: 1
+    }
+    pusher_stats {
+      uploaded_bytes: 878
+      total_bytes: 878
+    }
+  }
+}
+
+2020-10-28 22:22:39,830 INFO    MainThread:41339 [wandb_run.py:_wait_for_finish():1377] got exit ret: uuid: "a4c22ca7975c4f329d0a404cda39624b"
+response {
+  poll_exit_response {
+    done: true
+    exit_result {
+    }
+    file_counts {
+      wandb_count: 5
+    }
+    pusher_stats {
+      uploaded_bytes: 33024
+      total_bytes: 33024
+    }
+  }
+}
+
+2020-10-28 22:22:40,957 INFO    MainThread:41339 [wandb_run.py:_show_summary():1520] rendering summary
+2020-10-28 22:22:40,958 INFO    MainThread:41339 [wandb_run.py:_show_history():1558] rendering history
+2020-10-28 22:22:40,959 INFO    MainThread:41339 [wandb_run.py:_show_files():1586] logging synced files
+2020-10-28 22:22:40,961 INFO    MainThread:41339 [internal.py:handle_exit():137] Internal process exited

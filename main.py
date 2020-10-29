@@ -7,10 +7,18 @@ from run_train import train
 from run_test import test
 from data import data_loader
 from torch import optim
+import wandb
+wandb.login()
 
 def main():
     # Training settings
     parser = argparse.ArgumentParser(description="Measuring Privacy and Fairness Trade-offs")
+    parser.add_argument(
+        "-rn",
+        "--run-name",
+        type=str,
+        help="Define run name for logging",
+    )
     parser.add_argument(
         "-b",
         "--batch-size",
@@ -107,15 +115,30 @@ def main():
         default="./bank-data/bank-additional.csv",
         help="Path to test data",
     )
+
     args = parser.parse_args()
     device = torch.device(args.device)
+
 
     dataset = data_loader(args)
     train_data, test_data, cat_emb_size, num_conts = dataset.__getitem__()
     train_size, test_size = dataset.__len__()
+    sensitive_cat_keys = dataset.getkeys()
     run_results = []
 
     for i in range(args.n_runs):
+        wandb.init(project="privacy-fairness", name=args.run_name,  config={
+            #"run_name": args.run_name,
+            "architecture": 'RegressionModel',
+            "dataset": args.dataset,
+            "batch_size": args.batch_size,
+            "n_epoch": args.epochs,
+            "learning_rate": args.lr,
+            "sigma(noise)": args.sigma,
+            "disable_dp": args.disable_dp,
+            "n_run": i
+        })
+        config = wandb.config
         model = RegressionModel(emb_szs=cat_emb_size,
                             n_cont=num_conts,
                             emb_drop=0.04,
@@ -147,17 +170,42 @@ def main():
         for epoch in range(1, args.epochs + 1):
             train(args, model, device, train_data, optimizer, epoch)
 
-        run_results.append(test(args, model, device, test_data, test_size))
+        accuracy, avg_loss, recall, avg_recall_by_group, avg_eq_odds, avg_dem_par = test(args, model, device, test_data, test_size)
+        run_results.append(accuracy)
 
 
+        print("\nTest set: Average loss: {:.4f}, Accuracy: {:.2f}%\n".format(avg_loss,accuracy))
 
+        print(
+            "\nTest set: Average fairness score:\nOverall recall: {:.4f}, \nRecall by Group: {}, \nEqualized Odds: {:.4f}, \nDemographic Parity: {:.4f} \n".format(
+                recall,
+                avg_recall_by_group,
+                avg_eq_odds,
+                avg_dem_par
+            )
+        )
+        log_dict = {"accuracy": accuracy,
+                    "avg_loss": avg_loss,
+                    "recall": recall,
+                    "avg_eq_odds": avg_eq_odds,
+                    "avg_dem_par": avg_dem_par}
+        for i in avg_recall_by_group.keys():
+            category = sensitive_cat_keys[i]
+            value = avg_recall_by_group[i]
+            log_dict[category] = value
+
+        print(log_dict)
+        wandb.log(log_dict)
+
+
+    """
     if len(run_results) > 1:
         print(
             "Accuracy averaged over {} runs: {:.2f}% ± {:.2f}%".format(
                 len(run_results), np.mean(run_results), np.std(run_results)
             )
         )
-
+    """
     repro_str = (
         f"{model.name()}_{args.lr}_{args.sigma}_"
         f"{args.max_per_sample_grad_norm}_{args.batch_size}_{args.epochs}"

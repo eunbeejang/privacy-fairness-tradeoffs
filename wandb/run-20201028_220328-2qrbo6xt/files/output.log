@@ -1,0 +1,78 @@
+RegressionModel(
+  (embs): ModuleList(
+    (0): Embedding(13, 6)
+    (1): Embedding(5, 2)
+    (2): Embedding(9, 4)
+    (3): Embedding(4, 2)
+    (4): Embedding(4, 2)
+    (5): Embedding(4, 2)
+    (6): Embedding(3, 1)
+    (7): Embedding(11, 5)
+    (8): Embedding(6, 3)
+    (9): Embedding(4, 2)
+  )
+  (lins): ModuleList(
+    (0): Linear(in_features=39, out_features=1000, bias=True)
+    (1): Linear(in_features=1000, out_features=500, bias=True)
+    (2): Linear(in_features=500, out_features=250, bias=True)
+  )
+  (bns): ModuleList(
+    (0): GroupNorm(1, 1000, eps=1e-05, affine=True)
+    (1): GroupNorm(1, 500, eps=1e-05, affine=True)
+    (2): GroupNorm(1, 250, eps=1e-05, affine=True)
+  )
+  (outp): Linear(in_features=250, out_features=1, bias=True)
+  (emb_drop): Dropout(p=0.04, inplace=False)
+  (drops): ModuleList(
+    (0): Dropout(p=0.001, inplace=False)
+    (1): Dropout(p=0.01, inplace=False)
+    (2): Dropout(p=0.01, inplace=False)
+  )
+  (bn): GroupNorm(1, 10, eps=1e-05, affine=True)
+  (activation): Sigmoid()
+) 
+
+
+=== RUN # 0 ====================================
+
+  0%|          | 0/572 [00:00<?, ?it/s]  1%|          | 7/572 [00:00<00:08, 66.26it/s]  3%|▎         | 16/572 [00:00<00:07, 69.74it/s]  4%|▍         | 24/572 [00:00<00:07, 72.28it/s]  6%|▌         | 32/572 [00:00<00:07, 73.84it/s]  7%|▋         | 41/572 [00:00<00:06, 75.88it/s]  9%|▊         | 50/572 [00:00<00:06, 77.70it/s] 10%|█         | 59/572 [00:00<00:06, 79.03it/s] 12%|█▏        | 68/572 [00:00<00:06, 80.55it/s] 13%|█▎        | 77/572 [00:00<00:06, 81.20it/s] 15%|█▍        | 85/572 [00:01<00:06, 80.32it/s] 16%|█▋        | 94/572 [00:01<00:05, 80.87it/s] 18%|█▊        | 103/572 [00:01<00:05, 81.59it/s] 20%|█▉        | 112/572 [00:01<00:05, 81.55it/s] 21%|██        | 121/572 [00:01<00:05, 82.11it/s] 23%|██▎       | 130/572 [00:01<00:05, 82.42it/s] 24%|██▍       | 139/572 [00:01<00:05, 83.21it/s] 26%|██▌       | 148/572 [00:01<00:05, 82.69it/s] 27%|██▋       | 157/572 [00:01<00:04, 83.18it/s] 29%|██▉       | 166/572 [00:02<00:04, 83.55it/s] 31%|███       | 175/572 [00:02<00:04, 84.05it/s] 32%|███▏      | 184/572 [00:02<00:04, 83.79it/s] 34%|███▎      | 193/572 [00:02<00:04, 83.63it/s] 35%|███▌      | 202/572 [00:02<00:04, 83.32it/s] 37%|███▋      | 211/572 [00:02<00:04, 84.00it/s] 38%|███▊      | 220/572 [00:02<00:04, 83.94it/s] 40%|████      | 229/572 [00:02<00:04, 83.86it/s] 42%|████▏     | 238/572 [00:02<00:04, 82.97it/s] 43%|████▎     | 247/572 [00:03<00:03, 81.63it/s] 45%|████▍     | 256/572 [00:03<00:03, 81.72it/s] 46%|████▋     | 265/572 [00:03<00:03, 80.34it/s] 48%|████▊     | 274/572 [00:03<00:03, 81.36it/s] 49%|████▉     | 283/572 [00:03<00:03, 81.70it/s] 51%|█████     | 292/572 [00:03<00:03, 82.48it/s] 53%|█████▎    | 301/572 [00:03<00:03, 82.45it/s] 54%|█████▍    | 310/572 [00:03<00:03, 82.56it/s] 56%|█████▌    | 319/572 [00:03<00:03, 82.96it/s] 57%|█████▋    | 328/572 [00:04<00:02, 82.48it/s] 59%|█████▉    | 337/572 [00:04<00:02, 83.13it/s] 60%|██████    | 346/572 [00:04<00:02, 82.78it/s] 62%|██████▏   | 355/572 [00:04<00:02, 83.68it/s] 64%|██████▎   | 364/572 [00:04<00:02, 84.19it/s] 65%|██████▌   | 373/572 [00:04<00:02, 83.72it/s] 67%|██████▋   | 382/572 [00:04<00:02, 82.51it/s] 68%|██████▊   | 391/572 [00:04<00:02, 80.80it/s] 70%|██████▉   | 400/572 [00:04<00:02, 81.27it/s] 72%|███████▏  | 409/572 [00:04<00:02, 80.06it/s] 73%|███████▎  | 418/572 [00:05<00:01, 79.76it/s] 75%|███████▍  | 427/572 [00:05<00:01, 81.15it/s] 76%|███████▌  | 436/572 [00:05<00:01, 81.19it/s] 78%|███████▊  | 445/572 [00:05<00:01, 81.54it/s] 79%|███████▉  | 454/572 [00:05<00:01, 81.47it/s] 81%|████████  | 463/572 [00:05<00:01, 81.72it/s] 83%|████████▎ | 472/572 [00:05<00:01, 82.07it/s] 84%|████████▍ | 481/572 [00:05<00:01, 81.39it/s] 86%|████████▌ | 490/572 [00:05<00:01, 81.52it/s] 87%|████████▋ | 499/572 [00:06<00:00, 82.22it/s] 89%|████████▉ | 508/572 [00:06<00:00, 81.55it/s] 90%|█████████ | 517/572 [00:06<00:00, 81.77it/s] 92%|█████████▏| 526/572 [00:06<00:00, 81.90it/s] 94%|█████████▎| 535/572 [00:06<00:00, 81.92it/s] 95%|█████████▌| 544/572 [00:06<00:00, 82.01it/s] 97%|█████████▋| 553/572 [00:06<00:00, 81.23it/s] 98%|█████████▊| 562/572 [00:06<00:00, 79.77it/s]100%|█████████▉| 571/572 [00:06<00:00, 80.58it/s]100%|██████████| 572/572 [00:06<00:00, 81.84it/s]
+Train Epoch: 1 	 Loss: 0.4878167345  0%|          | 0/1 [00:00<?, ?it/s]
+/Users/eunbeejang/miniconda3/envs/py38/lib/python3.8/site-packages/sklearn/utils/validation.py:67: FutureWarning: Pass labels=[1, 0] as keyword args. From version 0.25 passing these as positional arguments will result in an error
+  warnings.warn("Pass {} as keyword args. From version 0.25 "
+100%|██████████| 1/1 [00:00<00:00,  3.68it/s][[ 341  110]
+ [ 354 3314]]
+100%|██████████| 1/1 [00:00<00:00,  3.68it/s]
+
+Test set: Average loss: 0.0001, Accuracy: 88.74%
+
+
+Test set: Average fairness score:
+Overall recall: 0.7561, 
+Recall by Group: {0: 0.813953488372093, 1: 0.7777777777777778, 2: 0.7032258064516129, 3: 1.0}, 
+Equalized Odds: 0.2968, 
+Demographic Parity: 0.2089 
+
+Traceback (most recent call last):
+  File "main.py", line 214, in <module>
+    main()
+  File "main.py", line 185, in main
+    wandb.log({
+  File "/Users/eunbeejang/miniconda3/envs/py38/lib/python3.8/site-packages/wandb/sdk/wandb_run.py", line 851, in log
+    self.history._row_add(data)
+  File "/Users/eunbeejang/miniconda3/envs/py38/lib/python3.8/site-packages/wandb/sdk/wandb_history.py", line 34, in _row_add
+    self._flush()
+  File "/Users/eunbeejang/miniconda3/envs/py38/lib/python3.8/site-packages/wandb/sdk/wandb_history.py", line 49, in _flush
+    self._callback(row=self._data, step=self._step)
+  File "/Users/eunbeejang/miniconda3/envs/py38/lib/python3.8/site-packages/wandb/sdk/wandb_run.py", line 640, in _history_callback
+    self._backend.interface.publish_history(row, step)
+  File "/Users/eunbeejang/miniconda3/envs/py38/lib/python3.8/site-packages/wandb/interface/interface.py", line 171, in publish_history
+    item.value_json = json_dumps_safer_history(v)
+  File "/Users/eunbeejang/miniconda3/envs/py38/lib/python3.8/site-packages/wandb/util.py", line 546, in json_dumps_safer_history
+    return json.dumps(obj, cls=WandBHistoryJSONEncoder, **kwargs)
+  File "/Users/eunbeejang/miniconda3/envs/py38/lib/python3.8/json/__init__.py", line 234, in dumps
+    return cls(
+  File "/Users/eunbeejang/miniconda3/envs/py38/lib/python3.8/json/encoder.py", line 199, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "/Users/eunbeejang/miniconda3/envs/py38/lib/python3.8/json/encoder.py", line 257, in iterencode
+    return _iterencode(o, 0)
+TypeError: keys must be str, int, float, bool or None, not numpy.int64

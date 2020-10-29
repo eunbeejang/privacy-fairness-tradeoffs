@@ -46,6 +46,7 @@ class data_loader():
         train_data = LoadDataset(train_df, args.dataset)
         test_data = LoadDataset(test_df, args.dataset)
 
+        self.sensitive_keys = train_data.getkeys()
         self.train_size = len(train_data)
         self.test_size = len(test_data)
 
@@ -77,6 +78,8 @@ class data_loader():
     def test_dataloader(self): # for PyTorch Lightening
         return DataLoader(self, test_loader)
 
+    def getkeys(self):
+        return self.sensitive_keys
 
     def __getitem__(self):
         return self.train_loader, self.test_loader, self.cat_emb_size, self.num_conts
@@ -118,8 +121,8 @@ class LoadDataset(Dataset):
             day_of_week = data['day_of_week'].cat.codes.values
             poutcome = data['poutcome'].cat.codes.values
 
-            cat_dict = dict(enumerate(data['education'].cat.categories))
-            print(cat_dict)
+            self.cat_dict = dict(enumerate(data['education'].cat.categories))
+            print(self.cat_dict)
 
             categorical_data = np.stack([job, marital, education,
                                          default, housing, loan,
@@ -150,8 +153,8 @@ class LoadDataset(Dataset):
             sex = data['sex'].cat.codes.values
             native_country = data['native-country'].cat.codes.values
 
-            cat_dict = dict(enumerate(data['education'].cat.categories))
-            print(cat_dict)
+            self.cat_dict = dict(enumerate(data['education'].cat.categories))
+            print(self.cat_dict)
 
             categorical_data = np.stack([workclass, education, marital_status,
                                          occupation, relationship, race,
@@ -182,11 +185,15 @@ class LoadDataset(Dataset):
 
         self.num_numerical_cols = self.numerical_data.shape[1]
 
+    def getkeys(self):
+        return self.cat_dict
+
     def __getitem__(self, idx):
         return self.categorical_data[idx], self.numerical_data[idx].float(), self.Y[idx].float()
 
     def __len__(self):
         return self.len
+
 
 
 def get_class_distribution(dataset_obj):

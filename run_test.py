@@ -79,7 +79,7 @@ def test(args, model, device, test_loader, test_size):
 
 
     test_loss /= test_size
-
+    """
     print(
         "\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)\n".format(
             test_loss,
@@ -99,5 +99,12 @@ def test(args, model, device, test_loader, test_size):
             avg_dem_par/i
         )
     )
-    return 100.0 * correct / test_size
+    """
+    accuracy = 100.0 * correct / test_size
+    avg_loss = test_loss
+    recall = avg_recall/i
+    avg_recall_by_group = {k: v / i for k, v in avg_recall_by_group.items()}
+    avg_eq_odds = avg_eq_odds/i
+    avg_dem_par = avg_dem_par/i
+    return accuracy, avg_loss, recall, avg_recall_by_group, avg_eq_odds, avg_dem_par
 
