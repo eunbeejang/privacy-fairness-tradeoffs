@@ -6,6 +6,7 @@ from model import RegressionModel
 from run_train import train
 from run_test import test
 from data import data_loader
+from torch import optim
 
 def main():
     # Training settings
@@ -123,8 +124,8 @@ def main():
                             drops=[0.001, 0.01, 0.01],
                             y_range=(0, 1)).to(device)
 
-#        optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=0)
-        optimizer = RegressionModel.configure_optimizers()
+        optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=0)
+#        optimizer = RegressionModel.configure_optimizers()
 
         if not args.disable_dp:
             privacy_engine = PrivacyEngine(

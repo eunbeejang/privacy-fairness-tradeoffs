@@ -43,8 +43,8 @@ class data_loader():
         train_df = train_df.sample(frac=1).reset_index(drop=True)  # shuffle df
         test_df = test_df.sample(frac=1).reset_index(drop=True)  # shuffle df
 
-        train_data = Dataset(train_df, args.dataset)
-        test_data = Dataset(test_df, args.dataset)
+        train_data = LoadDataset(train_df, args.dataset)
+        test_data = LoadDataset(test_df, args.dataset)
 
         self.train_size = len(train_data)
         self.test_size = len(test_data)
@@ -86,7 +86,7 @@ class data_loader():
 
 
 
-class BankDataset(Dataset):
+class LoadDataset(Dataset):
     def __init__(self, data, mode):
 
 
@@ -117,6 +117,9 @@ class BankDataset(Dataset):
             month = data['month'].cat.codes.values
             day_of_week = data['day_of_week'].cat.codes.values
             poutcome = data['poutcome'].cat.codes.values
+
+            cat_dict = dict(enumerate(data['education'].cat.categories))
+            print(cat_dict)
 
             categorical_data = np.stack([job, marital, education,
                                          default, housing, loan,
