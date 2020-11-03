@@ -4,30 +4,63 @@ from sampler import BalancedBatchSampler
 import torch
 import pandas as pd
 import numpy as np
+import os
 pd.set_option('mode.chained_assignment', None)
 
 
 class data_loader():
-    def __init__(self, args):
+    def __init__(self, args, s):
 
         # bank data --> sep=';'
         # adult data --> sep=','
-
-
         if args.dataset == 'bank':
+            train_path = 'bank-data/bank-additional-full.csv'
 
-            train_df = pd.read_csv(args.train_data_path, sep=';')
-            test_df = pd.read_csv(args.test_data_path, sep=';')
+        elif args.dataset == 'bank-pre-dp':
+            if s == 0.1:
+                train_path = 'bank-data/synth01/syth_data_correlated_ymod.csv'
+            elif s == 0.5:
+                train_path = 'bank-data/synth05/syth_data_correlated_ymod.csv'
+            elif s == 1.0:
+                train_path = 'bank-data/synth10/syth_data_correlated_ymod.csv'
+            else:
+                train_path = 'bank-data/bank-additional-full.csv'
 
         elif args.dataset == 'adult':
+            train_path = 'adult-data/adult.data'
+
+        elif args.dataset == 'adult-pre-dp':
+            if s == 0.1:
+                train_path = 'adult-data/synth01/syth_data_correlated_ymod.csv'
+            elif s == 0.5:
+                train_path = 'adult-data/synth05/syth_data_correlated_ymod.csv'
+            elif s == 1.0:
+                train_path = 'adult-data/synth10/syth_data_correlated_ymod.csv'
+            else:
+                train_path = 'adult-data/adult.data'
+
+
+        if args.dataset == 'bank' or args.dataset == 'bank-pre-dp':
+            cols = ['age', 'job', 'marital', 'education',
+                    'default', 'housing', 'loan', 'contact',
+                    'month', 'day_of_week', 'duration',
+                    'campaign', 'pdays', 'previous', 'poutcome',
+                    'emp.var.rate', 'cons.price.idx', 'cons.conf.idx', 'euribor3m',
+                    'nr.employed', 'y']
+            test_path = 'bank-data/bank-additional.csv'
+            train_df = pd.read_csv(train_path, sep=';', names=cols)
+            test_df = pd.read_csv(test_path, sep=';', names=cols)
+
+        elif args.dataset == 'adult' or args.dataset == 'adult-pre-dp':
+            test_path = 'adult-data/adult.test'
 
             cols = ['age', 'workclass', 'fnlwgt', 'education',
                     'education-num', 'marital-status', 'occupation',
                     'relationship', 'race', 'sex', 'capital-gain',
                     'capital-loss', 'hours-per-week', 'native-country', 'y']
 
-            train_df = pd.read_csv(args.train_data_path, sep=',', names=cols)
-            test_df = pd.read_csv(args.test_data_path, sep=',', names=cols)
+            train_df = pd.read_csv(train_path, sep=',', names=cols)
+            test_df = pd.read_csv(test_path, sep=',', names=cols)
 
             train_df = train_df.replace({'?': np.nan})
             test_df = test_df.replace({'?': np.nan})
@@ -51,6 +84,7 @@ class data_loader():
         self.test_size = len(test_data)
 
         self.cat_emb_size = train_data.categorical_embedding_sizes # size of categorical embedding
+        print(self.cat_emb_size)
         self.num_conts = train_data.num_numerical_cols # number of numerical variables
 
 
@@ -95,7 +129,9 @@ class LoadDataset(Dataset):
 
         self.len = data.shape[0]
 
-        if mode == 'bank':
+        print(data.head())
+
+        if mode == 'bank' or mode == 'bank-pre-dp':
             categorical_columns = ['job', 'marital',
                                    'education', 'default', 'housing',
                                    'loan', 'contact', 'month',
@@ -129,7 +165,7 @@ class LoadDataset(Dataset):
                                          contact, month, day_of_week,
                                          poutcome], 1)
 
-        elif mode == 'adult':
+        elif mode == 'adult' or mode == 'adult-pre-dp':
 
             # define data column types
             categorical_columns = ['workclass', 'education', 'marital-status',

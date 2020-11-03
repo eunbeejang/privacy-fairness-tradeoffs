@@ -1,0 +1,82 @@
+2020-11-02 01:32:56,889 INFO    MainThread:52969 [wandb_init.py:_log_setup():293] Logging user logs to wandb/run-20201102_013256-63g3ro33/logs/debug.log
+2020-11-02 01:32:56,889 INFO    MainThread:52969 [wandb_init.py:_log_setup():294] Logging internal logs to wandb/run-20201102_013256-63g3ro33/logs/debug-internal.log
+2020-11-02 01:32:56,889 INFO    MainThread:52969 [wandb_setup.py:_flush():69] setting env: {}
+2020-11-02 01:32:56,889 INFO    MainThread:52969 [wandb_setup.py:_flush():69] setting user settings: {'email': 'eunbee.jang@mail.mcgill.ca'}
+2020-11-02 01:32:56,889 INFO    MainThread:52969 [wandb_setup.py:_flush():69] multiprocessing start_methods=spawn,fork,forkserver
+2020-11-02 01:32:58,514 INFO    MainThread:52969 [wandb_run.py:_console_start():1290] atexit reg
+2020-11-02 01:32:58,516 INFO    MainThread:52969 [wandb_run.py:_redirect():1160] redirect: SettingsConsole.REDIRECT
+2020-11-02 01:32:58,517 INFO    MainThread:52969 [wandb_run.py:_redirect():1163] Redirecting console.
+2020-11-02 01:32:58,517 INFO    MainThread:52969 [redirect.py:install():196] install start
+2020-11-02 01:32:58,517 INFO    MainThread:52969 [redirect.py:install():211] install stop
+2020-11-02 01:32:58,517 INFO    MainThread:52969 [redirect.py:install():196] install start
+2020-11-02 01:32:58,518 INFO    MainThread:52969 [redirect.py:install():211] install stop
+2020-11-02 01:32:58,518 INFO    MainThread:52969 [wandb_run.py:_redirect():1207] Redirects installed.
+2020-11-02 01:35:26,785 INFO    MainThread:52969 [wandb_init.py:_log_setup():293] Logging user logs to wandb/run-20201102_013526-3azbdqsv/logs/debug.log
+2020-11-02 01:35:26,785 INFO    MainThread:52969 [wandb_init.py:_log_setup():294] Logging internal logs to wandb/run-20201102_013526-3azbdqsv/logs/debug-internal.log
+2020-11-02 01:35:26,785 INFO    MainThread:52969 [wandb_setup.py:_flush():69] setting env: {}
+2020-11-02 01:35:26,785 INFO    MainThread:52969 [wandb_setup.py:_flush():69] setting user settings: {'email': 'eunbee.jang@mail.mcgill.ca'}
+2020-11-02 01:35:26,785 INFO    MainThread:52969 [wandb_setup.py:_flush():69] multiprocessing start_methods=spawn,fork,forkserver
+2020-11-02 01:35:26,786 INFO    MainThread:52969 [wandb_init.py:init():326] wandb.init() called when a run is still active
+2020-11-02 01:37:03,752 INFO    MainThread:52969 [wandb_init.py:_log_setup():293] Logging user logs to wandb/run-20201102_013703-1ryhbb7z/logs/debug.log
+2020-11-02 01:37:03,752 INFO    MainThread:52969 [wandb_init.py:_log_setup():294] Logging internal logs to wandb/run-20201102_013703-1ryhbb7z/logs/debug-internal.log
+2020-11-02 01:37:03,752 INFO    MainThread:52969 [wandb_setup.py:_flush():69] setting env: {}
+2020-11-02 01:37:03,752 INFO    MainThread:52969 [wandb_setup.py:_flush():69] setting user settings: {'email': 'eunbee.jang@mail.mcgill.ca'}
+2020-11-02 01:37:03,752 INFO    MainThread:52969 [wandb_setup.py:_flush():69] multiprocessing start_methods=spawn,fork,forkserver
+2020-11-02 01:37:03,754 INFO    MainThread:52969 [wandb_init.py:init():326] wandb.init() called when a run is still active
+2020-11-02 01:38:40,600 INFO    MainThread:52969 [wandb_init.py:_log_setup():293] Logging user logs to wandb/run-20201102_013840-300sxcmw/logs/debug.log
+2020-11-02 01:38:40,600 INFO    MainThread:52969 [wandb_init.py:_log_setup():294] Logging internal logs to wandb/run-20201102_013840-300sxcmw/logs/debug-internal.log
+2020-11-02 01:38:40,600 INFO    MainThread:52969 [wandb_setup.py:_flush():69] setting env: {}
+2020-11-02 01:38:40,600 INFO    MainThread:52969 [wandb_setup.py:_flush():69] setting user settings: {'email': 'eunbee.jang@mail.mcgill.ca'}
+2020-11-02 01:38:40,601 INFO    MainThread:52969 [wandb_setup.py:_flush():69] multiprocessing start_methods=spawn,fork,forkserver
+2020-11-02 01:38:40,602 INFO    MainThread:52969 [wandb_init.py:init():326] wandb.init() called when a run is still active
+2020-11-02 01:40:16,236 INFO    MainThread:52969 [wandb_run.py:_atexit_cleanup():1263] got exitcode: 0
+2020-11-02 01:40:16,237 INFO    MainThread:52969 [wandb_run.py:_restore():1235] restore
+2020-11-02 01:40:16,237 INFO    MainThread:52969 [redirect.py:uninstall():215] uninstall start
+2020-11-02 01:40:16,237 INFO    MainThread:52969 [redirect.py:_stop():264] _stop: stdout
+2020-11-02 01:40:16,238 INFO    stdout    :52969 [redirect.py:_pipe_relay():119] relay done saw last write: stdout
+2020-11-02 01:40:16,238 INFO    MainThread:52969 [redirect.py:_stop():270] _stop closed: stdout
+2020-11-02 01:40:16,238 INFO    stdout    :52969 [redirect.py:_pipe_relay():135] relay done done: stdout
+2020-11-02 01:40:16,238 INFO    MainThread:52969 [redirect.py:_stop():276] _stop joined: stdout
+2020-11-02 01:40:16,238 INFO    MainThread:52969 [redirect.py:_stop():278] _stop rd closed: stdout
+2020-11-02 01:40:16,239 INFO    MainThread:52969 [redirect.py:uninstall():219] uninstall done
+2020-11-02 01:40:16,239 INFO    MainThread:52969 [redirect.py:uninstall():215] uninstall start
+2020-11-02 01:40:16,239 INFO    MainThread:52969 [redirect.py:_stop():264] _stop: stderr
+2020-11-02 01:40:16,239 INFO    MainThread:52969 [redirect.py:_stop():270] _stop closed: stderr
+2020-11-02 01:40:16,239 INFO    stderr    :52969 [redirect.py:_pipe_relay():119] relay done saw last write: stderr
+2020-11-02 01:40:16,239 INFO    stderr    :52969 [redirect.py:_pipe_relay():135] relay done done: stderr
+2020-11-02 01:40:16,240 INFO    MainThread:52969 [redirect.py:_stop():276] _stop joined: stderr
+2020-11-02 01:40:16,240 INFO    MainThread:52969 [redirect.py:_stop():278] _stop rd closed: stderr
+2020-11-02 01:40:16,240 INFO    MainThread:52969 [redirect.py:uninstall():219] uninstall done
+2020-11-02 01:40:16,244 INFO    MainThread:52969 [wandb_run.py:_wait_for_finish():1377] got exit ret: uuid: "b9773b4602284b0e937e8f5facb262c4"
+response {
+  poll_exit_response {
+    file_counts {
+      wandb_count: 1
+    }
+    pusher_stats {
+      uploaded_bytes: 888
+      total_bytes: 888
+    }
+  }
+}
+
+2020-11-02 01:40:18,255 INFO    MainThread:52969 [wandb_run.py:_wait_for_finish():1377] got exit ret: uuid: "5b458a7380994b4795f012ca07168b0e"
+response {
+  poll_exit_response {
+    done: true
+    exit_result {
+    }
+    file_counts {
+      wandb_count: 5
+    }
+    pusher_stats {
+      uploaded_bytes: 265610
+      total_bytes: 265610
+    }
+  }
+}
+
+2020-11-02 01:40:19,374 INFO    MainThread:52969 [wandb_run.py:_show_summary():1520] rendering summary
+2020-11-02 01:40:19,375 INFO    MainThread:52969 [wandb_run.py:_show_history():1558] rendering history
+2020-11-02 01:40:19,376 INFO    MainThread:52969 [wandb_run.py:_show_files():1586] logging synced files
+2020-11-02 01:40:19,378 INFO    MainThread:52969 [internal.py:handle_exit():137] Internal process exited

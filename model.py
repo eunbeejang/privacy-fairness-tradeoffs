@@ -7,8 +7,8 @@ import torch.optim as optim
 
 
 
-#class RegressionModel(nn.Module):
-class RegressionModel(pl.LightningModule):
+class RegressionModel(nn.Module):
+#class RegressionModel(pl.LightningModule):
     def __init__(self, emb_szs, n_cont, emb_drop, out_sz, szs, drops, y_range, use_bn=True):
         super().__init__()
 

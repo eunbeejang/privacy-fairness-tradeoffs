@@ -1,0 +1,29 @@
+{
+    "os": "macOS-10.15.6-x86_64-i386-64bit",
+    "python": "3.8.5",
+    "heartbeatAt": "2020-11-03T00:18:25.967004",
+    "startedAt": "2020-11-03T00:18:24.753802",
+    "docker": null,
+    "cpu_count": 8,
+    "cuda": null,
+    "args": [
+        "--dataset",
+        "bank-pre-dp",
+        "--device",
+        "cpu",
+        "--disable-dp",
+        "-rn=bank-privbayes-marital"
+    ],
+    "state": "running",
+    "codePath": "main.py",
+    "program": "main.py",
+    "git": {
+        "remote": "https://github.com/eunbeejang/privacy-fairness-tradeoffs.git",
+        "commit": "7b86d9ce001f2c405f24e14b7af5fa5268ec5251"
+    },
+    "email": "eunbee.jang@mail.mcgill.ca",
+    "root": "/Users/eunbeejang/Desktop/thesis/privacy-fairness-tradeoffs",
+    "host": "Eunbees-MacBook-Pro.local",
+    "username": "eunbeejang",
+    "executable": "/Users/eunbeejang/miniconda3/envs/py38/bin/python"
+}

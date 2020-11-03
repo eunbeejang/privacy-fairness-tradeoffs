@@ -1,0 +1,80 @@
+RegressionModel(
+  (embs): ModuleList(
+    (0): Embedding(13, 6)
+    (1): Embedding(5, 2)
+    (2): Embedding(9, 4)
+    (3): Embedding(4, 2)
+    (4): Embedding(4, 2)
+    (5): Embedding(4, 2)
+    (6): Embedding(3, 1)
+    (7): Embedding(11, 5)
+    (8): Embedding(6, 3)
+    (9): Embedding(4, 2)
+  )
+  (lins): ModuleList(
+    (0): Linear(in_features=39, out_features=1000, bias=True)
+    (1): Linear(in_features=1000, out_features=500, bias=True)
+    (2): Linear(in_features=500, out_features=250, bias=True)
+  )
+  (bns): ModuleList(
+    (0): GroupNorm(1, 1000, eps=1e-05, affine=True)
+    (1): GroupNorm(1, 500, eps=1e-05, affine=True)
+    (2): GroupNorm(1, 250, eps=1e-05, affine=True)
+  )
+  (outp): Linear(in_features=250, out_features=1, bias=True)
+  (emb_drop): Dropout(p=0.04, inplace=False)
+  (drops): ModuleList(
+    (0): Dropout(p=0.001, inplace=False)
+    (1): Dropout(p=0.01, inplace=False)
+    (2): Dropout(p=0.01, inplace=False)
+  )
+  (bn): GroupNorm(1, 10, eps=1e-05, affine=True)
+  (activation): Sigmoid()
+) 
+
+
+=== RUN # 0 ====================================
+
+  0%|          | 0/572 [00:00<?, ?it/s]  1%|          | 7/572 [00:00<00:08, 68.56it/s]  3%|▎         | 15/572 [00:00<00:07, 71.01it/s]  4%|▍         | 24/572 [00:00<00:07, 73.31it/s]  6%|▌         | 32/572 [00:00<00:07, 73.18it/s]  7%|▋         | 40/572 [00:00<00:07, 74.39it/s]  8%|▊         | 48/572 [00:00<00:06, 74.97it/s] 10%|▉         | 56/572 [00:00<00:06, 75.27it/s] 11%|█         | 64/572 [00:00<00:06, 75.72it/s] 13%|█▎        | 73/572 [00:00<00:06, 77.29it/s] 14%|█▍        | 81/572 [00:01<00:06, 77.47it/s] 16%|█▌        | 89/572 [00:01<00:06, 76.58it/s] 17%|█▋        | 97/572 [00:01<00:06, 76.16it/s] 19%|█▊        | 106/572 [00:01<00:06, 77.29it/s] 20%|██        | 115/572 [00:01<00:05, 78.42it/s] 22%|██▏       | 123/572 [00:01<00:05, 77.49it/s] 23%|██▎       | 131/572 [00:01<00:06, 71.89it/s] 24%|██▍       | 139/572 [00:01<00:06, 67.49it/s] 26%|██▌       | 147/572 [00:01<00:06, 70.11it/s] 27%|██▋       | 155/572 [00:02<00:05, 72.22it/s] 28%|██▊       | 163/572 [00:02<00:05, 74.10it/s] 30%|██▉       | 171/572 [00:02<00:05, 75.30it/s] 31%|███▏      | 179/572 [00:02<00:05, 72.23it/s] 33%|███▎      | 188/572 [00:02<00:05, 74.58it/s] 34%|███▍      | 196/572 [00:02<00:05, 75.04it/s] 36%|███▌      | 204/572 [00:02<00:04, 74.65it/s] 37%|███▋      | 212/572 [00:02<00:04, 75.57it/s] 39%|███▊      | 221/572 [00:02<00:04, 76.74it/s] 40%|████      | 229/572 [00:03<00:04, 77.13it/s] 41%|████▏     | 237/572 [00:03<00:04, 77.48it/s] 43%|████▎     | 245/572 [00:03<00:04, 71.62it/s] 44%|████▍     | 253/572 [00:03<00:04, 71.46it/s] 46%|████▌     | 261/572 [00:03<00:04, 71.31it/s] 47%|████▋     | 269/572 [00:03<00:04, 70.50it/s] 48%|████▊     | 277/572 [00:03<00:04, 69.14it/s] 50%|████▉     | 284/572 [00:03<00:04, 65.42it/s] 51%|█████     | 291/572 [00:03<00:04, 64.61it/s] 52%|█████▏    | 298/572 [00:04<00:04, 63.39it/s] 53%|█████▎    | 305/572 [00:04<00:04, 65.00it/s] 55%|█████▍    | 313/572 [00:04<00:03, 68.43it/s] 56%|█████▌    | 321/572 [00:04<00:03, 71.37it/s] 58%|█████▊    | 329/572 [00:04<00:03, 73.35it/s] 59%|█████▉    | 337/572 [00:04<00:03, 74.68it/s] 60%|██████    | 346/572 [00:04<00:02, 76.10it/s] 62%|██████▏   | 354/572 [00:04<00:02, 76.64it/s] 63%|██████▎   | 363/572 [00:04<00:02, 77.98it/s] 65%|██████▍   | 371/572 [00:05<00:02, 77.80it/s] 66%|██████▋   | 379/572 [00:05<00:02, 77.90it/s] 68%|██████▊   | 387/572 [00:05<00:02, 77.86it/s] 69%|██████▉   | 395/572 [00:05<00:02, 77.86it/s] 71%|███████   | 404/572 [00:05<00:02, 78.50it/s] 72%|███████▏  | 412/572 [00:05<00:02, 78.68it/s] 74%|███████▎  | 421/572 [00:05<00:01, 79.58it/s] 75%|███████▌  | 430/572 [00:05<00:01, 79.98it/s] 77%|███████▋  | 439/572 [00:05<00:01, 80.54it/s] 78%|███████▊  | 448/572 [00:06<00:01, 75.93it/s] 80%|███████▉  | 456/572 [00:06<00:01, 76.83it/s] 81%|████████▏ | 465/572 [00:06<00:01, 77.67it/s] 83%|████████▎ | 473/572 [00:06<00:01, 77.69it/s] 84%|████████▍ | 481/572 [00:06<00:01, 76.99it/s] 85%|████████▌ | 489/572 [00:06<00:01, 77.70it/s] 87%|████████▋ | 498/572 [00:06<00:00, 78.68it/s] 89%|████████▊ | 507/572 [00:06<00:00, 80.09it/s] 90%|█████████ | 516/572 [00:06<00:00, 80.12it/s] 92%|█████████▏| 525/572 [00:06<00:00, 80.49it/s] 93%|█████████▎| 534/572 [00:07<00:00, 81.09it/s] 95%|█████████▍| 543/572 [00:07<00:00, 80.54it/s] 97%|█████████▋| 552/572 [00:07<00:00, 80.63it/s] 98%|█████████▊| 561/572 [00:07<00:00, 80.95it/s]100%|█████████▉| 570/572 [00:07<00:00, 81.46it/s]100%|██████████| 572/572 [00:07<00:00, 75.78it/s]Train Epoch: 1 	 Loss: 0.4840052246
+
+  0%|          | 0/1 [00:00<?, ?it/s]/Users/eunbeejang/miniconda3/envs/py38/lib/python3.8/site-packages/sklearn/utils/validation.py:67: FutureWarning: Pass labels=[1, 0] as keyword args. From version 0.25 passing these as positional arguments will result in an error
+  warnings.warn("Pass {} as keyword args. From version 0.25 "
+[[ 303  148]
+ [ 288 3380]]
+100%|██████████| 1/1 [00:00<00:00,  3.64it/s]
+Test set: Average loss: 0.0001, Accuracy: 89.41%
+
+
+Test set: Average fairness score:
+Overall recall: 0.6718, 
+Recall by Group: {0: 0.6744186046511628, 1: 0.6666666666666666, 2: 0.6774193548387096, 3: 1.0}, 
+Equalized Odds: 0.3333, 
+Demographic Parity: 0.0563 
+
+{'accuracy': 89.41490653071133, 'avg_loss': 5.279573299665421e-05, 'recall': 0.6718403547671841, 'avg_eq_odds': 0.33333333333333337, 'avg_dem_par': 0.05625764370158989, 'basic.4y': 0.6744186046511628, 'basic.6y': 0.6666666666666666, 'basic.9y': 0.6774193548387096, 'high.school': 1.0}
+100%|██████████| 1/1 [00:00<00:00,  3.63it/s]
+Traceback (most recent call last):
+  File "/Users/eunbeejang/miniconda3/envs/py38/lib/python3.8/site-packages/pandas/core/indexes/base.py", line 2891, in get_loc
+    return self._engine.get_loc(casted_key)
+  File "pandas/_libs/index.pyx", line 70, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/index.pyx", line 101, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/hashtable_class_helper.pxi", line 1675, in pandas._libs.hashtable.PyObjectHashTable.get_item
+  File "pandas/_libs/hashtable_class_helper.pxi", line 1683, in pandas._libs.hashtable.PyObjectHashTable.get_item
+KeyError: 'job'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "main.py", line 227, in <module>
+    main()
+  File "main.py", line 128, in main
+    dataset = data_loader(args, s)
+  File "/Users/eunbeejang/Desktop/thesis/privacy-fairness-tradeoffs/data.py", line 73, in __init__
+    train_data = LoadDataset(train_df, args.dataset)
+  File "/Users/eunbeejang/Desktop/thesis/privacy-fairness-tradeoffs/data.py", line 137, in __init__
+    data[category] = data[category].astype('category')
+  File "/Users/eunbeejang/miniconda3/envs/py38/lib/python3.8/site-packages/pandas/core/frame.py", line 2902, in __getitem__
+    indexer = self.columns.get_loc(key)
+  File "/Users/eunbeejang/miniconda3/envs/py38/lib/python3.8/site-packages/pandas/core/indexes/base.py", line 2893, in get_loc
+    raise KeyError(key) from err
+KeyError: 'job'

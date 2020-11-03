@@ -1,13 +1,13 @@
 import argparse
 import torch
 from opacus import PrivacyEngine
-import numpy as np
 from model import RegressionModel
 from run_train import train
 from run_test import test
 from data import data_loader
 from torch import optim
 import wandb
+
 wandb.login()
 
 def main():
@@ -58,10 +58,10 @@ def main():
     )
     parser.add_argument(
         "--sigma",
-        type=float,
-        default=1.0,
+        type=list,
+        default=[0, 0.1, 0.5, 1.0],
         metavar="S",
-        help="Noise multiplier (default 1.0)",
+        help="Noise multiplier (default [0, 0.1, 0.5, 1.0])",
     )
     parser.add_argument(
         "-c",
@@ -120,23 +120,27 @@ def main():
     device = torch.device(args.device)
 
 
-    dataset = data_loader(args)
-    train_data, test_data, cat_emb_size, num_conts = dataset.__getitem__()
-    train_size, test_size = dataset.__len__()
-    sensitive_cat_keys = dataset.getkeys()
-    run_results = []
 
-    for i in range(args.n_runs):
-        wandb.init(project="privacy-fairness", name=args.run_name,  config={
+
+
+
+#    for i in range(args.n_runs):
+    for i, s in enumerate(args.sigma):
+        dataset = data_loader(args, s)
+        train_data, test_data, cat_emb_size, num_conts = dataset.__getitem__()
+        train_size, test_size = dataset.__len__()
+        sensitive_cat_keys = dataset.getkeys()
+        #run_results = []
+
+        wandb.init(project="privacy-fairness-init", name=args.run_name,  config={
             #"run_name": args.run_name,
             "architecture": 'RegressionModel',
             "dataset": args.dataset,
             "batch_size": args.batch_size,
             "n_epoch": args.epochs,
             "learning_rate": args.lr,
-            "sigma(noise)": args.sigma,
+            "sigma(noise)": s,
             "disable_dp": args.disable_dp,
-            "n_run": i
         })
         config = wandb.config
         model = RegressionModel(emb_szs=cat_emb_size,
@@ -147,20 +151,26 @@ def main():
                             drops=[0.001, 0.01, 0.01],
                             y_range=(0, 1)).to(device)
 
+        for layer in model.children():
+            print('RESET MODEL PARAMETERS')
+            if hasattr(layer, 'reset_parameters'):
+                layer.reset_parameters()
+
         optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=0)
 #        optimizer = RegressionModel.configure_optimizers()
 
         if not args.disable_dp:
-            privacy_engine = PrivacyEngine(
-                model,
-                batch_size=args.batch_size,
-                sample_size=train_size,
-                alphas=[1 + x / 10.0 for x in range(1, 100)] + list(range(12, 64)),
-                noise_multiplier=args.sigma,
-                max_grad_norm=args.max_per_sample_grad_norm,
-                secure_rng=False,
-            )
-            privacy_engine.attach(optimizer)
+            if s > 0:
+                privacy_engine = PrivacyEngine(
+                    model,
+                    batch_size=args.batch_size,
+                    sample_size=train_size,
+                    alphas=[1 + x / 10.0 for x in range(1, 100)] + list(range(12, 64)),
+                    noise_multiplier=s,
+                    max_grad_norm=args.max_per_sample_grad_norm,
+                    secure_rng=False,
+                )
+                privacy_engine.attach(optimizer)
 
         if i == 0: # print model properties
             print(model, '\n')
@@ -168,30 +178,30 @@ def main():
         print("\n=== RUN # {} ====================================\n".format(i))
 
         for epoch in range(1, args.epochs + 1):
-            train(args, model, device, train_data, optimizer, epoch)
+            train(args, model, device, train_data, optimizer, epoch, s)
 
         accuracy, avg_loss, recall, avg_recall_by_group, avg_eq_odds, avg_dem_par = test(args, model, device, test_data, test_size)
-        run_results.append(accuracy)
+        #run_results.append(accuracy)
 
 
         print("\nTest set: Average loss: {:.4f}, Accuracy: {:.2f}%\n".format(avg_loss,accuracy))
 
         print(
-            "\nTest set: Average fairness score:\nOverall recall: {:.4f}, \nRecall by Group: {}, \nEqualized Odds: {:.4f}, \nDemographic Parity: {:.4f} \n".format(
+            "\nTest set: Average fairness score:",
                 recall,
                 avg_recall_by_group,
                 avg_eq_odds,
                 avg_dem_par
             )
-        )
+
         log_dict = {"accuracy": accuracy,
                     "avg_loss": avg_loss,
                     "recall": recall,
                     "avg_eq_odds": avg_eq_odds,
                     "avg_dem_par": avg_dem_par}
-        for i in avg_recall_by_group.keys():
-            category = sensitive_cat_keys[i]
-            value = avg_recall_by_group[i]
+        for j in avg_recall_by_group.keys():
+            category = sensitive_cat_keys[j]
+            value = avg_recall_by_group[j]
             log_dict[category] = value
 
         print(log_dict)
@@ -206,15 +216,18 @@ def main():
             )
         )
     """
+
+    # save model
+    """
     repro_str = (
-        f"{model.name()}_{args.lr}_{args.sigma}_"
+        f"{model.name()}_{args.lr}_{s}_"
         f"{args.max_per_sample_grad_norm}_{args.batch_size}_{args.epochs}"
     )
     torch.save(run_results, f"./saved_outputs/run_results_{repro_str}.out")
 
     if args.save_model:
         torch.save(model.state_dict(), f"./saved_models/{args.dataset}_logistic_{repro_str}.model")
-
+    """
 
 if __name__ == "__main__":
     main()

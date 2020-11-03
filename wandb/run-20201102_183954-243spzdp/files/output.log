@@ -1,0 +1,9 @@
+resetting  embs
+Traceback (most recent call last):
+  File "main.py", line 232, in <module>
+    main()
+  File "main.py", line 156, in main
+    module.reset_parameters()
+  File "/Users/eunbeejang/miniconda3/envs/py38/lib/python3.8/site-packages/torch/nn/modules/module.py", line 771, in __getattr__
+    raise ModuleAttributeError("'{}' object has no attribute '{}'".format(
+torch.nn.modules.module.ModuleAttributeError: 'ModuleList' object has no attribute 'reset_parameters'

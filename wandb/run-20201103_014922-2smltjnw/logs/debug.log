@@ -1,0 +1,6 @@
+2020-11-03 01:49:22,576 INFO    MainThread:57787 [wandb_init.py:_log_setup():293] Logging user logs to wandb/run-20201103_014922-2smltjnw/logs/debug.log
+2020-11-03 01:49:22,576 INFO    MainThread:57787 [wandb_init.py:_log_setup():294] Logging internal logs to wandb/run-20201103_014922-2smltjnw/logs/debug-internal.log
+2020-11-03 01:49:22,576 INFO    MainThread:57787 [wandb_setup.py:_flush():69] setting env: {}
+2020-11-03 01:49:22,577 INFO    MainThread:57787 [wandb_setup.py:_flush():69] setting user settings: {'email': 'eunbee.jang@mail.mcgill.ca'}
+2020-11-03 01:49:22,577 INFO    MainThread:57787 [wandb_setup.py:_flush():69] multiprocessing start_methods=spawn,fork,forkserver
+2020-11-03 01:49:22,578 INFO    MainThread:57787 [wandb_init.py:init():326] wandb.init() called when a run is still active

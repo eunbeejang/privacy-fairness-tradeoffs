@@ -33,7 +33,6 @@ def test(args, model, device, test_loader, test_size):
             pred = (output > 0.5).float()
             correct += pred.eq(target.view_as(pred)).sum().item()
 
-
             # plot confusion matrix
             cm = confusion_matrix(target, pred, [1, 0])
 
@@ -50,8 +49,8 @@ def test(args, model, device, test_loader, test_size):
             plt.show()
             """
             # position of col for sensitive values
-#            sensitive = [i[3].item() for i in cats]
-            sensitive = [i[1].item() for i in cats]
+            sensitive = [i[2].item() for i in cats] # marital
+#            sensitive = [i[1].item() for i in cats] # education
 
 
             # Fairness metrics
@@ -60,6 +59,7 @@ def test(args, model, device, test_loader, test_size):
                                              target, pred,
                                               sensitive_features=sensitive,
                                               sample_weight=None)
+
 
             eq_odds = flm.equalized_odds_difference(target, pred,
                                               sensitive_features=sensitive,

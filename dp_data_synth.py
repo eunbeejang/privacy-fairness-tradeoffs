@@ -8,6 +8,7 @@ import os
 
 def main():
     parser = argparse.ArgumentParser(description="DP Data Synthesizer - PriveBayes")
+    """
     parser.add_argument( # remove/change
         "-i",
         "--input-file",
@@ -22,6 +23,7 @@ def main():
         default="./bank-data/synth/",
         help="Path to input data",
     )
+    """
     parser.add_argument(
         "-m",
         "--mode",

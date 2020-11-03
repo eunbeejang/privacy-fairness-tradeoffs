@@ -9,7 +9,7 @@ torch.manual_seed(0)
 
 
 
-def train(args, model, device, train_loader, optimizer, epoch):
+def train(args, model, device, train_loader, optimizer, epoch, sigma):
     model.train()
     criterion = nn.BCELoss()
     losses = []
@@ -20,8 +20,8 @@ def train(args, model, device, train_loader, optimizer, epoch):
 
         # Terminate when the model predicts NaN
         if torch.isnan(cats).any() or torch.isnan(output).any():
-            print(_batch_idx, cats, output)
-            exit()
+            #print(_batch_idx, cats, output)
+            exit("ERROR: Predicted NaN")
 
         else:
             loss = criterion(output, target)
@@ -31,12 +31,15 @@ def train(args, model, device, train_loader, optimizer, epoch):
             losses.append(loss.item())
 
     if not args.disable_dp:
-        epsilon, best_alpha = optimizer.privacy_engine.get_privacy_spent(args.delta)
-        print(
-            f"Train Epoch: {epoch} \t"
-            f"Loss: {np.mean(losses):.6f} "
-            f"(ε = {epsilon:.2f}, δ = {args.delta}) for α = {best_alpha}"
-        )
+        if sigma > 0:
+            epsilon, best_alpha = optimizer.privacy_engine.get_privacy_spent(args.delta)
+            print(
+                f"Train Epoch: {epoch} \t"
+                f"Loss: {np.mean(losses):.6f} "
+                f"(ε = {epsilon:.2f}, δ = {args.delta}) for α = {best_alpha}"
+            )
+        else:
+            print(f"Train Epoch: {epoch} \t Loss: {np.mean(losses):.10f}")
+
     else:
         print(f"Train Epoch: {epoch} \t Loss: {np.mean(losses):.10f}")
-
