@@ -110,11 +110,9 @@ def main():
 
 
     # specify which attributes are candidate keys of input dataset.
-    candidate_keys = {'y': 'yes'}
+    candidate_keys = {'ssn': True}
 
 
-    # Increase epsilon value to reduce the injected noises. Set epsilon=0 to turn off differential privacy.
-    epsilon = args.epsilon
 
     # The maximum number of parents in Bayesian network, i.e., the maximum number of incoming edges.
     degree_of_bayesian_network = 2
@@ -139,7 +137,7 @@ def main():
         save_path = output_dir + '/syth_data_correlated_ymod.csv'
 
         describer.describe_dataset_in_correlated_attribute_mode(dataset_file=input_data,
-                                                                epsilon=epsilon,
+                                                                epsilon=args.epsilon,
                                                                 k=degree_of_bayesian_network,
                                                                 attribute_to_is_categorical=categorical_attributes,
                                                                 attribute_to_is_candidate_key=candidate_keys)

@@ -18,11 +18,11 @@ class data_loader():
 
         elif args.dataset == 'bank-pre-dp':
             if s == 0.1:
-                train_path = 'bank-data/synth01/syth_data_correlated_ymod.csv'
+                train_path = 'bank-data/out/sythetic_data01.csv'
             elif s == 0.5:
-                train_path = 'bank-data/synth05/syth_data_correlated_ymod.csv'
+                train_path = 'bank-data/out/sythetic_data05.csv'
             elif s == 1.0:
-                train_path = 'bank-data/synth10/syth_data_correlated_ymod.csv'
+                train_path = 'bank-data/out/sythetic_data.csv'
             else:
                 train_path = 'bank-data/bank-additional-full.csv'
 
@@ -31,11 +31,11 @@ class data_loader():
 
         elif args.dataset == 'adult-pre-dp':
             if s == 0.1:
-                train_path = 'adult-data/synth01/syth_data_correlated_ymod.csv'
+                train_path = 'adult-data/out/sythetic_data01.csv'
             elif s == 0.5:
-                train_path = 'adult-data/synth05/syth_data_correlated_ymod.csv'
+                train_path = 'adult-data/out/sythetic_data05.csv'
             elif s == 1.0:
-                train_path = 'adult-data/synth10/syth_data_correlated_ymod.csv'
+                train_path = 'adult-data/out/sythetic_data.csv'
             else:
                 train_path = 'adult-data/adult.data'
 

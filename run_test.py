@@ -49,8 +49,8 @@ def test(args, model, device, test_loader, test_size):
             plt.show()
             """
             # position of col for sensitive values
-            sensitive = [i[2].item() for i in cats] # marital
-#            sensitive = [i[1].item() for i in cats] # education
+#            sensitive = [i[2].item() for i in cats] # marital
+            sensitive = [i[1].item() for i in cats] # education
 
 
             # Fairness metrics
