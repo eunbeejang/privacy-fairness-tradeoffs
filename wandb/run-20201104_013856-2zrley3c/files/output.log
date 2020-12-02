@@ -1,56 +1,0 @@
-RESET MODEL PARAMETERS
-RESET MODEL PARAMETERS
-RESET MODEL PARAMETERS
-RESET MODEL PARAMETERS
-RESET MODEL PARAMETERS
-RESET MODEL PARAMETERS
-RESET MODEL PARAMETERS
-RESET MODEL PARAMETERS
-RegressionModel(
-  (embs): ModuleList(
-    (0): Embedding(10, 5)
-    (1): Embedding(17, 8)
-    (2): Embedding(8, 4)
-    (3): Embedding(16, 8)
-    (4): Embedding(7, 3)
-    (5): Embedding(6, 3)
-    (6): Embedding(3, 1)
-    (7): Embedding(43, 21)
-  )
-  (lins): ModuleList(
-    (0): Linear(in_features=58, out_features=1000, bias=True)
-    (1): Linear(in_features=1000, out_features=500, bias=True)
-    (2): Linear(in_features=500, out_features=250, bias=True)
-  )
-  (bns): ModuleList(
-    (0): GroupNorm(1, 1000, eps=1e-05, affine=True)
-    (1): GroupNorm(1, 500, eps=1e-05, affine=True)
-    (2): GroupNorm(1, 250, eps=1e-05, affine=True)
-  )
-  (outp): Linear(in_features=250, out_features=1, bias=True)
-  (emb_drop): Dropout(p=0.04, inplace=False)
-  (drops): ModuleList(
-    (0): Dropout(p=0.001, inplace=False)
-    (1): Dropout(p=0.01, inplace=False)
-    (2): Dropout(p=0.01, inplace=False)
-  )
-  (bn): GroupNorm(1, 5, eps=1e-05, affine=True)
-  (activation): Sigmoid()
-) 
-
-
-=== RUN # 0 ====================================
-
-  0%|          | 0/387 [00:00<?, ?it/s]  2%|▏         | 8/387 [00:00<00:04, 78.58it/s]  4%|▍         | 17/387 [00:00<00:04, 80.79it/s]  6%|▋         | 25/387 [00:00<00:04, 80.37it/s]  9%|▉         | 35/387 [00:00<00:04, 83.20it/s] 11%|█         | 41/387 [00:00<00:04, 82.63it/s]
-Traceback (most recent call last):
-  File "main.py", line 233, in <module>
-    main()
-  File "main.py", line 181, in main
-    train(args, model, device, train_data, optimizer, epoch, s)
-  File "/Users/eunbeejang/Desktop/thesis/privacy-fairness-tradeoffs/run_train.py", line 29, in train
-    loss.backward()
-  File "/Users/eunbeejang/miniconda3/envs/py38/lib/python3.8/site-packages/torch/tensor.py", line 185, in backward
-    torch.autograd.backward(self, gradient, retain_graph, create_graph)
-  File "/Users/eunbeejang/miniconda3/envs/py38/lib/python3.8/site-packages/torch/autograd/__init__.py", line 125, in backward
-    Variable._execution_engine.run_backward(
-KeyboardInterrupt

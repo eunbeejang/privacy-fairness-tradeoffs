@@ -1,48 +1,0 @@
-RegressionModel(
-  (embs): ModuleList(
-    (0): Embedding(10, 5)
-    (1): Embedding(17, 8)
-    (2): Embedding(8, 4)
-    (3): Embedding(16, 8)
-    (4): Embedding(7, 3)
-    (5): Embedding(6, 3)
-    (6): Embedding(3, 1)
-    (7): Embedding(43, 21)
-  )
-  (lins): ModuleList(
-    (0): Linear(in_features=58, out_features=1000, bias=True)
-    (1): Linear(in_features=1000, out_features=500, bias=True)
-    (2): Linear(in_features=500, out_features=250, bias=True)
-  )
-  (bns): ModuleList(
-    (0): GroupNorm(1, 1000, eps=1e-05, affine=True)
-    (1): GroupNorm(1, 500, eps=1e-05, affine=True)
-    (2): GroupNorm(1, 250, eps=1e-05, affine=True)
-  )
-  (outp): Linear(in_features=250, out_features=1, bias=True)
-  (emb_drop): Dropout(p=0.04, inplace=False)
-  (drops): ModuleList(
-    (0): Dropout(p=0.001, inplace=False)
-    (1): Dropout(p=0.01, inplace=False)
-    (2): Dropout(p=0.01, inplace=False)
-  )
-  (bn): GroupNorm(1, 5, eps=1e-05, affine=True)
-  (activation): Sigmoid()
-) 
-
-
-=== RUN # 0 ====================================
-
-  0%|          | 0/387 [00:00<?, ?it/s]  2%|▏         | 8/387 [00:00<00:04, 79.34it/s]  4%|▍         | 17/387 [00:00<00:04, 79.97it/s]  7%|▋         | 27/387 [00:00<00:04, 82.79it/s]  9%|▉         | 36/387 [00:00<00:04, 84.58it/s] 12%|█▏        | 45/387 [00:00<00:04, 85.20it/s] 14%|█▍        | 54/387 [00:00<00:03, 86.16it/s] 16%|█▋        | 63/387 [00:00<00:03, 86.60it/s] 19%|█▊        | 72/387 [00:00<00:03, 86.84it/s] 21%|██        | 81/387 [00:00<00:03, 86.90it/s] 23%|██▎       | 90/387 [00:01<00:03, 87.71it/s] 26%|██▌       | 99/387 [00:01<00:03, 87.86it/s] 28%|██▊       | 109/387 [00:01<00:03, 88.41it/s] 31%|███       | 119/387 [00:01<00:03, 88.99it/s] 33%|███▎      | 129/387 [00:01<00:02, 89.22it/s] 36%|███▌      | 138/387 [00:01<00:02, 85.19it/s] 38%|███▊      | 147/387 [00:01<00:02, 84.64it/s] 40%|████      | 156/387 [00:01<00:02, 85.85it/s] 43%|████▎     | 165/387 [00:01<00:02, 86.59it/s] 45%|████▍     | 174/387 [00:02<00:02, 87.29it/s] 47%|████▋     | 183/387 [00:02<00:02, 86.39it/s] 50%|████▉     | 192/387 [00:02<00:02, 87.32it/s] 52%|█████▏    | 201/387 [00:02<00:02, 87.36it/s] 55%|█████▍    | 211/387 [00:02<00:01, 88.25it/s] 57%|█████▋    | 220/387 [00:02<00:01, 88.09it/s] 59%|█████▉    | 229/387 [00:02<00:01, 87.94it/s] 61%|██████▏   | 238/387 [00:02<00:01, 88.13it/s] 64%|██████▍   | 247/387 [00:02<00:01, 87.76it/s] 66%|██████▌   | 256/387 [00:02<00:01, 87.43it/s] 68%|██████▊   | 265/387 [00:03<00:01, 88.10it/s] 69%|██████▉   | 267/387 [00:03<00:01, 86.89it/s]
-Traceback (most recent call last):
-  File "main.py", line 227, in <module>
-    main()
-  File "main.py", line 175, in main
-    train(args, model, device, train_data, optimizer, epoch, s)
-  File "/Users/eunbeejang/Desktop/thesis/privacy-fairness-tradeoffs/run_train.py", line 29, in train
-    loss.backward()
-  File "/Users/eunbeejang/miniconda3/envs/py38/lib/python3.8/site-packages/torch/tensor.py", line 185, in backward
-    torch.autograd.backward(self, gradient, retain_graph, create_graph)
-  File "/Users/eunbeejang/miniconda3/envs/py38/lib/python3.8/site-packages/torch/autograd/__init__.py", line 125, in backward
-    Variable._execution_engine.run_backward(
-KeyboardInterrupt
