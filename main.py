@@ -6,9 +6,10 @@ from run_train import train
 from run_test import test
 from data import data_loader
 from torch import optim
+import torch.nn as nn
+from pate import train_models, aggregated_teacher, test_student
 import wandb
-
-wandb.login()
+#wandb.login()
 
 def main():
     # Training settings
@@ -115,21 +116,33 @@ def main():
         default="./bank-data/bank-additional.csv",
         help="Path to test data",
     )
-
+    parser.add_argument(
+        "--num-teachers",
+        type=int,
+        default=0,
+        help="Number of PATE teacher (default=3)",
+    )
     args = parser.parse_args()
     device = torch.device(args.device)
 
 
 
-
-
-
 #    for i in range(args.n_runs):
     for i, s in enumerate(args.sigma):
-        dataset = data_loader(args, s)
-        train_data, test_data, cat_emb_size, num_conts = dataset.__getitem__()
-        train_size, test_size = dataset.__len__()
-        sensitive_cat_keys = dataset.getkeys()
+        if args.num_teachers == 0 or s == 0:
+            dataset = data_loader(args, s)
+            train_data, test_data = dataset.__getitem__()
+            cat_emb_size, num_conts = dataset.get_input_properties()
+            train_size, test_size = dataset.__len__()
+            sensitive_cat_keys = dataset.getkeys()
+        else:
+            dataset = data_loader(args, s)
+            train_size, test_size = dataset.__len__()
+            teacher_loaders = dataset.train_teachers()
+            student_train_loader, student_test_loader = dataset.student_data()
+            cat_emb_size, num_conts = dataset.get_input_properties()
+            print("!!!!!! DATA LOADED")
+
         #run_results = []
 
         wandb.init(project="privacy-fairness-init", name=args.run_name,  config={
@@ -155,9 +168,8 @@ def main():
             print('RESET MODEL PARAMETERS')
             if hasattr(layer, 'reset_parameters'):
                 layer.reset_parameters()
-
+        criterion = nn.BCELoss()
         optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=0)
-#        optimizer = RegressionModel.configure_optimizers()
 
         if not args.disable_dp:
             if s > 0:
@@ -172,62 +184,52 @@ def main():
                 )
                 privacy_engine.attach(optimizer)
 
-        if i == 0: # print model properties
-            print(model, '\n')
+        if args.num_teachers == 0 or s == 0:
+            if i == 0: # print model properties
+                print(model, '\n')
 
-        print("\n=== RUN # {} ====================================\n".format(i))
+            print("\n=== RUN # {} ====================================\n".format(i))
 
-        for epoch in range(1, args.epochs + 1):
-            train(args, model, device, train_data, optimizer, epoch, s)
+            for epoch in range(1, args.epochs + 1):
+                train(args, model, device, train_data, criterion, optimizer, epoch, s)
 
-        accuracy, avg_loss, recall, avg_recall_by_group, avg_eq_odds, avg_dem_par = test(args, model, device, test_data, test_size)
-        #run_results.append(accuracy)
+            accuracy, avg_loss, recall, avg_recall_by_group, avg_eq_odds, avg_dem_par, cm = test(args, model, device, test_data, test_size)
+
+            print("\nTest set: Average loss: {:.4f}, Accuracy: {:.2f}%\n".format(avg_loss,accuracy))
+
+            print(
+                "\nTest set: Average fairness score:",
+                    recall,
+                    avg_recall_by_group,
+                    avg_eq_odds,
+                    avg_dem_par,
+                    cm
+                )
+
+            log_dict = {"accuracy": accuracy,
+                        "avg_loss": avg_loss,
+                        "recall": recall,
+                        "avg_eq_odds": avg_eq_odds,
+                        "avg_dem_par": avg_dem_par}
+            for j in avg_recall_by_group.keys():
+                category = sensitive_cat_keys[j]
+                value = avg_recall_by_group[j]
+                log_dict[category] = value
+
+            print(log_dict)
+            wandb.log(log_dict)
+
+        else: #PATE MODEL
+            print("!!!!!! ENTERED HERE")
+
+            teacher_models = train_models(args, model, teacher_loaders, criterion, optimizer, device)
+            preds, student_labels = aggregated_teacher(teacher_models, student_train_loader, s, device)
+
+            test_student(args, student_train_loader, student_labels, student_test_loader, cat_emb_size, num_conts, device)
 
 
-        print("\nTest set: Average loss: {:.4f}, Accuracy: {:.2f}%\n".format(avg_loss,accuracy))
-
-        print(
-            "\nTest set: Average fairness score:",
-                recall,
-                avg_recall_by_group,
-                avg_eq_odds,
-                avg_dem_par
-            )
-
-        log_dict = {"accuracy": accuracy,
-                    "avg_loss": avg_loss,
-                    "recall": recall,
-                    "avg_eq_odds": avg_eq_odds,
-                    "avg_dem_par": avg_dem_par}
-        for j in avg_recall_by_group.keys():
-            category = sensitive_cat_keys[j]
-            value = avg_recall_by_group[j]
-            log_dict[category] = value
-
-        print(log_dict)
-        wandb.log(log_dict)
 
 
-    """
-    if len(run_results) > 1:
-        print(
-            "Accuracy averaged over {} runs: {:.2f}% ± {:.2f}%".format(
-                len(run_results), np.mean(run_results), np.std(run_results)
-            )
-        )
-    """
-
-    # save model
-    """
-    repro_str = (
-        f"{model.name()}_{args.lr}_{s}_"
-        f"{args.max_per_sample_grad_norm}_{args.batch_size}_{args.epochs}"
-    )
-    torch.save(run_results, f"./saved_outputs/run_results_{repro_str}.out")
-
-    if args.save_model:
-        torch.save(model.state_dict(), f"./saved_models/{args.dataset}_logistic_{repro_str}.model")
-    """
 
 if __name__ == "__main__":
     main()

@@ -1,10 +1,9 @@
-from torch.utils.data import Dataset, DataLoader
-#from torch.utils.data.sampler import WeightedRandomSampler
+from torch.utils.data import Dataset, DataLoader, Subset
 from sampler import BalancedBatchSampler
 import torch
 import pandas as pd
 import numpy as np
-import os
+import random
 pd.set_option('mode.chained_assignment', None)
 
 
@@ -13,6 +12,22 @@ class data_loader():
 
         # bank data --> sep=';'
         # adult data --> sep=','
+        # german data --> sep=' '
+        if args.dataset == 'german':
+            train_path = 'german-data/german.train'
+
+        elif args.dataset == 'german-pre-dp':
+            if s == 0.1:
+                train_path = 'german-data/out/sythetic_data01.csv'
+            elif s == 0.5:
+                train_path = 'german-data/out/sythetic_data025.csv'
+            elif s == 1.0:
+                train_path = 'german-data/out/sythetic_data05.csv'
+            else:
+                train_path = 'german-data/german.train'
+
+
+
         if args.dataset == 'bank':
             train_path = 'bank-data/bank-additional-full.csv'
 
@@ -20,9 +35,9 @@ class data_loader():
             if s == 0.1:
                 train_path = 'bank-data/out/sythetic_data01.csv'
             elif s == 0.5:
-                train_path = 'bank-data/out/sythetic_data05.csv'
+                train_path = 'bank-data/out/sythetic_data025.csv'
             elif s == 1.0:
-                train_path = 'bank-data/out/sythetic_data.csv'
+                train_path = 'bank-data/out/sythetic_data05.csv'
             else:
                 train_path = 'bank-data/bank-additional-full.csv'
 
@@ -33,12 +48,24 @@ class data_loader():
             if s == 0.1:
                 train_path = 'adult-data/out/sythetic_data01.csv'
             elif s == 0.5:
-                train_path = 'adult-data/out/sythetic_data05.csv'
+                train_path = 'adult-data/out/sythetic_data025.csv'
             elif s == 1.0:
-                train_path = 'adult-data/out/sythetic_data.csv'
+                train_path = 'adult-data/out/sythetic_data05.csv'
             else:
                 train_path = 'adult-data/adult.data'
 
+        if args.dataset == 'german' or args.dataset == 'german-pre-dp':
+            cols = ['existing_checking', 'duration', 'credit_history', 'purpose', 'credit_amount',
+                   'savings', 'employment_since', 'installment_rate', 'status_sex', 'other_debtors',
+                   'residence_since', 'property', 'age', 'other_installment_plans', 'housing',
+                   'existing_credits', 'job', 'people_liable', 'telephone', 'foreign_worker', 'y']
+
+            test_path = 'german-data/german.test'
+            train_df = pd.read_csv(train_path, sep=' ', names=cols)
+            test_df = pd.read_csv(test_path, sep=' ', names=cols)
+
+            train_df['y'] = train_df['y'].apply(lambda x: 0 if x==2 else 1)
+            test_df['y'] = test_df['y'].apply(lambda x: 0 if x==2 else 1)
 
         if args.dataset == 'bank' or args.dataset == 'bank-pre-dp':
             cols = ['age', 'job', 'marital', 'education',
@@ -95,33 +122,63 @@ class data_loader():
         train_batch = args.batch_size
         test_batch = len(test_data)
 
-        self.train_loader = DataLoader(dataset=train_data,
-                                       sampler=BalancedBatchSampler(train_data, train_data.Y),
-                                       batch_size=train_batch)
+        if args.num_teachers == 0 or s == 0:
+            self.train_loader = DataLoader(dataset=train_data,
+                                           sampler=BalancedBatchSampler(train_data, train_data.Y),
+                                           batch_size=train_batch)
 
-        self.test_loader = DataLoader(dataset=test_data,
-                                      batch_size=test_batch,
-                                 drop_last=True)
+            self.test_loader = DataLoader(dataset=test_data,
+                                          batch_size=test_batch,
+                                          drop_last=True)
+        else:
+
+            self.teacher_loaders = []
+            data_size = len(train_data) // args.num_teachers
+
+            for i in range(data_size):
+                indices = list(range(i * data_size, (i + 1) * data_size))
+                subset_data = Subset(train_data, indices)
 
 
+                loader = DataLoader(dataset=subset_data,
+                                    #sampler=BalancedBatchSampler(train_data, train_data.Y),
+                                    batch_size=train_batch,
+                                    shuffle=True)
+                self.teacher_loaders.append(loader)
 
-    def train_dataloader(self): # for PyTorch Lightening
-        return DataLoader(self.train_loader)
+            indicies = list(range(len(test_data)))
+
+            indicies = random.sample(indicies, len(indicies))
+            student_split = int(len(test_data) * .7)
+            student_train_data = Subset(test_data, indicies[:student_split])
+            student_test_data = Subset(test_data, indicies[student_split+1:])
+
+            self.student_train_loader = torch.utils.data.DataLoader(student_train_data,
+                                                                    batch_size=test_batch,
+                                                                    shuffle=True)
+            self.student_test_loader = torch.utils.data.DataLoader(student_test_data,
+                                                                   batch_size=test_batch,
+                                                                   shuffle=True)
 
 
-    def test_dataloader(self): # for PyTorch Lightening
-        return DataLoader(self, test_loader)
 
     def getkeys(self):
         return self.sensitive_keys
 
+    def get_input_properties(self):
+        return self.cat_emb_size, self.num_conts
+
     def __getitem__(self):
-        return self.train_loader, self.test_loader, self.cat_emb_size, self.num_conts
+        return self.train_loader, self.test_loader
 
     def __len__(self):
         return self.train_size, self.test_size
 
+    def train_teachers(self):
+        return self.teacher_loaders
 
+    def student_data(self):
+        return self.student_train_loader, self.student_test_loader
 
 class LoadDataset(Dataset):
     def __init__(self, data, mode):
@@ -131,13 +188,64 @@ class LoadDataset(Dataset):
 
         print(data.head())
 
+        if mode == 'german' or mode == 'german-pre-dp':
+
+            categorical_columns = ['existing_checking',
+                                    'credit_history',
+                                    'purpose',
+                                    'savings',
+                                    'employment_since',
+                                    'status_sex',
+                                    'other_debtors',
+                                    'property',
+                                    'other_installment_plans',
+                                    'housing',
+                                    'job',
+                                    'telephone',
+                                    'foreign_worker']
+
+            numerical_columns = ['duration', 'credit_amount',
+                                   'installment_rate',
+                                   'residence_since', 'age',
+                                   'existing_credits', 'people_liable']
+
+            # categorical variables
+            for category in categorical_columns:
+                data[category] = data[category].astype('category')
+
+            existing_checking = data['existing_checking'].cat.codes.values
+            credit_history = data['credit_history'].cat.codes.values
+            purpose = data['purpose'].cat.codes.values
+            savings = data['savings'].cat.codes.values
+            employment_since = data['employment_since'].cat.codes.values
+            status_sex = data['status_sex'].cat.codes.values
+            other_debtors = data['other_debtors'].cat.codes.values
+            property = data['property'].cat.codes.values
+            other_installment_plans = data['other_installment_plans'].cat.codes.values
+            housing = data['housing'].cat.codes.values
+            job = data['job'].cat.codes.values
+            telephone = data['telephone'].cat.codes.values
+            foreign_worker = data['foreign_worker'].cat.codes.values
+
+
+#            self.cat_dict = dict(enumerate(data['job'].cat.categories))  # 10
+            self.cat_dict = dict(enumerate(data['status_sex'].cat.categories))  # 5
+
+            print(self.cat_dict)
+
+            categorical_data = np.stack([existing_checking, credit_history, purpose,
+                                            savings, employment_since, status_sex,
+                                            other_debtors, property,
+                                            other_installment_plans, housing,
+                                            job, telephone, foreign_worker], 1)
+
         if mode == 'bank' or mode == 'bank-pre-dp':
             categorical_columns = ['job', 'marital',
                                    'education', 'default', 'housing',
                                    'loan', 'contact', 'month',
                                    'day_of_week', 'poutcome']
 
-            numerical_columns = ['age', 'duration', 'campaign', 'pdays',
+            numerical_columns = ['duration', 'campaign', 'pdays',
                                  'previous', 'emp.var.rate', 'cons.price.idx',
                                  'cons.conf.idx', 'euribor3m', 'nr.employed']
 
@@ -145,19 +253,20 @@ class LoadDataset(Dataset):
             for category in categorical_columns:
                 data[category] = data[category].astype('category')
 
-            # age = data['age'].cat.codes.values
             job = data['job'].cat.codes.values
             marital = data['marital'].cat.codes.values
             education = data['education'].cat.codes.values
             default = data['default'].cat.codes.values
             housing = data['housing'].cat.codes.values
             loan = data['loan'].cat.codes.values
-            contact = data['contact'].cat.codes.values
+            contact = data['contact'].cat. codes.values
             month = data['month'].cat.codes.values
             day_of_week = data['day_of_week'].cat.codes.values
             poutcome = data['poutcome'].cat.codes.values
+#            self.cat_dict = dict(enumerate(data['education'].cat.categories)) # 2
+            self.cat_dict = dict(enumerate(data['job'].cat.categories)) # 0
 
-            self.cat_dict = dict(enumerate(data['education'].cat.categories))
+#            self.cat_dict = dict(enumerate(data['marital'].cat.categories)) # 1
             print(self.cat_dict)
 
             categorical_data = np.stack([job, marital, education,
@@ -172,7 +281,7 @@ class LoadDataset(Dataset):
                                    'occupation', 'relationship', 'race',
                                    'sex', 'native-country']
 
-            numerical_columns = ['age', 'education-num', 'capital-gain',
+            numerical_columns = ['education-num', 'capital-gain',
                                  'capital-loss', 'hours-per-week']
 
 
@@ -188,8 +297,9 @@ class LoadDataset(Dataset):
             race = data['race'].cat.codes.values
             sex = data['sex'].cat.codes.values
             native_country = data['native-country'].cat.codes.values
-
-            self.cat_dict = dict(enumerate(data['education'].cat.categories))
+#            self.cat_dict = dict(enumerate(data['education'].cat.categories)) # 1
+            self.cat_dict = dict(enumerate(data['race'].cat.categories)) # 5
+#            self.cat_dict = dict(enumerate(data['marital-status'].cat.categories)) # 2
             print(self.cat_dict)
 
             categorical_data = np.stack([workclass, education, marital_status,
@@ -241,6 +351,3 @@ def get_class_distribution(dataset_obj):
         count_dict[y_lbl] += 1
 
     return count_dict
-
-
-

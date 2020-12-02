@@ -1,5 +1,4 @@
 import numpy as np
-import torch.nn as nn
 import torch
 import pytorch_lightning as pl
 from torch import autograd
@@ -9,9 +8,10 @@ torch.manual_seed(0)
 
 
 
-def train(args, model, device, train_loader, optimizer, epoch, sigma):
+def train(args, model, device, train_loader,criterion, optimizer, epoch, sigma):
+
     model.train()
-    criterion = nn.BCELoss()
+
     losses = []
     for _batch_idx, (cats, conts, target) in enumerate(tqdm(train_loader)):
         cats, conts, target = cats.to(device), conts.to(device), target.to(device)
