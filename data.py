@@ -134,20 +134,35 @@ class data_loader():
 
             self.teacher_loaders = []
             data_size = len(train_data) // args.num_teachers
+            print("[1] ", data_size)
+            """
+            temp_loader = DataLoader(dataset=train_data,
+                                sampler=BalancedBatchSampler(train_data, train_data.Y),
+                                batch_size=1)
 
-            for i in range(data_size):
+            for i in temp_loader:
+                print(i)
+                exit()
+            """
+
+
+            for i in range(args.num_teachers):
                 indices = list(range(i * data_size, (i + 1) * data_size))
+                print(indices)
                 subset_data = Subset(train_data, indices)
+                subset_data_Y = [i[2] for i in subset_data]
 
+                subset_data_Y = torch.stack(subset_data_Y)
 
                 loader = DataLoader(dataset=subset_data,
-                                    #sampler=BalancedBatchSampler(train_data, train_data.Y),
-                                    batch_size=train_batch,
-                                    shuffle=True)
+                                    sampler=BalancedBatchSampler(subset_data, subset_data_Y),
+                                    batch_size=train_batch)
+                                    #shuffle=True)
+                print("WORKEDD")
                 self.teacher_loaders.append(loader)
+            print("*****", len(self.teacher_loaders))
 
             indicies = list(range(len(test_data)))
-
             indicies = random.sample(indicies, len(indicies))
             student_split = int(len(test_data) * .7)
             student_train_data = Subset(test_data, indicies[:student_split])

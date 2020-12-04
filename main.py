@@ -60,7 +60,7 @@ def main():
     parser.add_argument(
         "--sigma",
         type=list,
-        default=[0, 0.1, 0.5, 1.0],
+        default=[0.1, 0.5, 1.0],
         metavar="S",
         help="Noise multiplier (default [0, 0.1, 0.5, 1.0])",
     )
