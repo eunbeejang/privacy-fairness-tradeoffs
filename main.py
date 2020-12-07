@@ -8,6 +8,8 @@ from data import data_loader
 from torch import optim
 import torch.nn as nn
 from pate import train_models, aggregated_teacher, test_student
+from syft.frameworks.torch.dp import pate
+
 import wandb
 #wandb.login()
 
@@ -60,7 +62,7 @@ def main():
     parser.add_argument(
         "--sigma",
         type=list,
-        default=[0.1, 0.5, 1.0],
+        default=[0, 0.1, 0.5, 1.0],
         metavar="S",
         help="Noise multiplier (default [0, 0.1, 0.5, 1.0])",
     )
@@ -205,7 +207,7 @@ def main():
                     avg_dem_par,
                     cm
                 )
-
+            """
             log_dict = {"accuracy": accuracy,
                         "avg_loss": avg_loss,
                         "recall": recall,
@@ -218,7 +220,7 @@ def main():
 
             print(log_dict)
             wandb.log(log_dict)
-
+            """
         else: #PATE MODEL
             print("!!!!!! ENTERED HERE")
 
@@ -227,6 +229,13 @@ def main():
 
             test_student(args, student_train_loader, student_labels, student_test_loader, cat_emb_size, num_conts, device)
 
+
+            """
+            data_dep_eps, data_ind_eps = pate.perform_analysis(teacher_preds=preds, indices=student_labels,
+                                                               noise_eps=s, delta=1e-5)
+            print("Data Independent Epsilon:", data_ind_eps)
+            print("Data Dependent Epsilon:", data_dep_eps)
+            """
 
 
 
