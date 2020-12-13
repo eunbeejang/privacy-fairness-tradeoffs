@@ -167,7 +167,6 @@ def main():
                             y_range=(0, 1)).to(device)
 
         for layer in model.children():
-            print('RESET MODEL PARAMETERS')
             if hasattr(layer, 'reset_parameters'):
                 layer.reset_parameters()
         criterion = nn.BCELoss()
@@ -195,40 +194,15 @@ def main():
             for epoch in range(1, args.epochs + 1):
                 train(args, model, device, train_data, criterion, optimizer, epoch, s)
 
-            accuracy, avg_loss, recall, avg_recall_by_group, avg_eq_odds, avg_dem_par, cm = test(args, model, device, test_data, test_size)
-
-            print("\nTest set: Average loss: {:.4f}, Accuracy: {:.2f}%\n".format(avg_loss,accuracy))
-
-            print(
-                "\nTest set: Average fairness score:",
-                    recall,
-                    avg_recall_by_group,
-                    avg_eq_odds,
-                    avg_dem_par,
-                    cm
-                )
-            """
-            log_dict = {"accuracy": accuracy,
-                        "avg_loss": avg_loss,
-                        "recall": recall,
-                        "avg_eq_odds": avg_eq_odds,
-                        "avg_dem_par": avg_dem_par}
-            for j in avg_recall_by_group.keys():
-                category = sensitive_cat_keys[j]
-                value = avg_recall_by_group[j]
-                log_dict[category] = value
-
-            print(log_dict)
-            wandb.log(log_dict)
-            """
-        else: #PATE MODEL
+            accuracy, avg_loss, recall, avg_recall_by_group, avg_eq_odds, avg_tpr, avg_dem_par, cm = test(args, model, device, test_data, test_size)
+        else:  # PATE MODEL
             print("!!!!!! ENTERED HERE")
 
             teacher_models = train_models(args, model, teacher_loaders, criterion, optimizer, device)
             preds, student_labels = aggregated_teacher(teacher_models, student_train_loader, s, device)
 
-            test_student(args, student_train_loader, student_labels, student_test_loader, cat_emb_size, num_conts, device)
-
+            accuracy, avg_loss, recall, avg_recall_by_group, avg_eq_odds, avg_tpr, avg_dem_par, cm = test_student(args, student_train_loader, student_labels, student_test_loader, cat_emb_size, num_conts,
+                         device)
 
             """
             data_dep_eps, data_ind_eps = pate.perform_analysis(teacher_preds=preds, indices=student_labels,
@@ -236,6 +210,48 @@ def main():
             print("Data Independent Epsilon:", data_ind_eps)
             print("Data Dependent Epsilon:", data_dep_eps)
             """
+
+        print("\nTest set: Average loss: {:.4f}, Accuracy: {:.2f}%\n".format(avg_loss,accuracy))
+
+        print(
+            """
+\nTest set: Average fairness score:\n
+recall: {}\n
+avg_recall_by_group:\n
+{}\n
+avg_eq_odds: {}\n
+avg_tpr: {}\n
+avg_dem_par: {}\n
+cm:\n
+{}\n
+""".format(
+                recall,
+                avg_recall_by_group,
+                avg_eq_odds,
+                avg_tpr,
+                avg_dem_par,
+                cm
+            ))
+        """
+        log_dict = {"accuracy": accuracy,
+                    "avg_loss": avg_loss,
+                    "recall": recall,
+                    "avg_eq_odds": avg_eq_odds,
+                    "avg_tpr": avg_tpr,
+                    "avg_dem_par": avg_dem_par,
+                    "tn": cm[0],
+                    "fp": cm[1],
+                    "fn": cm[2],
+                    "tp": cm[3]
+                    }
+        for j in avg_recall_by_group.keys():
+            category = sensitive_cat_keys[j]
+            value = avg_recall_by_group[j]
+            log_dict[category] = value
+
+        print(log_dict)
+        wandb.log(log_dict)
+        """
 
 
 
