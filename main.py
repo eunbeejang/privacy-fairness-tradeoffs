@@ -7,11 +7,14 @@ from run_test import test
 from data import data_loader
 from torch import optim
 import torch.nn as nn
+import numpy as np
 from pate import train_models, aggregated_teacher, test_student
-from syft.frameworks.torch.dp import pate
+import shap
+from toolz import curry
+#from syft.frameworks.torch.dp import pate
 
 import wandb
-#wandb.login()
+wandb.login()
 
 def main():
     # Training settings
@@ -19,6 +22,7 @@ def main():
     parser.add_argument(
         "-rn",
         "--run-name",
+        required=True,
         type=str,
         help="Define run name for logging",
     )
@@ -62,7 +66,7 @@ def main():
     parser.add_argument(
         "--sigma",
         type=list,
-        default=[0, 0.1, 0.5, 1.0],
+        default=[0, 1.0, 0.85, 0.6, 0.45, 0.3, 0.15],
         metavar="S",
         help="Noise multiplier (default [0, 0.1, 0.5, 1.0])",
     )
@@ -103,7 +107,8 @@ def main():
     parser.add_argument(
         "--dataset",
         type=str,
-        default="bank",
+        #default="bank",
+        required=True,
         help="Specify the dataset you want to test on. (bank: bank marketing, adult: adult census)",
     )
     parser.add_argument(
@@ -124,6 +129,12 @@ def main():
         default=0,
         help="Number of PATE teacher (default=3)",
     )
+    parser.add_argument(
+        "--sensitive",
+        type=str,
+        required=True,
+        help="Name of sensitive column",
+    )
     args = parser.parse_args()
     device = torch.device(args.device)
 
@@ -137,12 +148,18 @@ def main():
             cat_emb_size, num_conts = dataset.get_input_properties()
             train_size, test_size = dataset.__len__()
             sensitive_cat_keys = dataset.getkeys()
+            sensitive_idx = dataset.get_sensitive_idx()
+            print(sensitive_cat_keys)
         else:
             dataset = data_loader(args, s)
-            train_size, test_size = dataset.__len__()
+            train_size, test_size = dataset.__lenls__()
             teacher_loaders = dataset.train_teachers()
             student_train_loader, student_test_loader = dataset.student_data()
             cat_emb_size, num_conts = dataset.get_input_properties()
+            sensitive_cat_keys = dataset.getkeys()
+            sensitive_idx = dataset.sensitive_col_idx()
+            print(sensitive_cat_keys)
+
             print("!!!!!! DATA LOADED")
 
         #run_results = []
@@ -194,15 +211,30 @@ def main():
             for epoch in range(1, args.epochs + 1):
                 train(args, model, device, train_data, criterion, optimizer, epoch, s)
 
-            accuracy, avg_loss, recall, avg_recall_by_group, avg_eq_odds, avg_tpr, avg_dem_par, cm = test(args, model, device, test_data, test_size)
+            """
+
+            batch = next(iter(train_data))
+            cats, conts, _ = batch
+
+            test_batch = next(iter(test_data))
+            test_cats, test_conts, _ = test_batch
+
+            explainer = shap.KernelExplainer(model, [cats.numpy(), conts.numpy()])
+            print(explainer)
+            shap_values = explainer.shap_values(cats.numpy())
+            shap.plots.bar(shap_values)
+            exit():q
+            
+            """
+            accuracy, avg_loss, recall, avg_eq_odds, avg_tpr, avg_dem_par, cm, sub_cm = test(args, model, device, test_data, test_size, sensitive_idx)
         else:  # PATE MODEL
             print("!!!!!! ENTERED HERE")
 
             teacher_models = train_models(args, model, teacher_loaders, criterion, optimizer, device)
             preds, student_labels = aggregated_teacher(teacher_models, student_train_loader, s, device)
 
-            accuracy, avg_loss, recall, avg_recall_by_group, avg_eq_odds, avg_tpr, avg_dem_par, cm = test_student(args, student_train_loader, student_labels, student_test_loader, cat_emb_size, num_conts,
-                         device)
+            accuracy, avg_loss, recall, avg_eq_odds, avg_tpr, avg_dem_par, cm, sub_cm = test_student(args, student_train_loader, student_labels, student_test_loader, cat_emb_size, num_conts,
+                         device, sensitive_idx)
 
             """
             data_dep_eps, data_ind_eps = pate.perform_analysis(teacher_preds=preds, indices=student_labels,
@@ -211,28 +243,31 @@ def main():
             print("Data Dependent Epsilon:", data_dep_eps)
             """
 
-        print("\nTest set: Average loss: {:.4f}, Accuracy: {:.2f}%\n".format(avg_loss,accuracy))
+        #print("\nTest set: Average loss: {:.4f}, Accuracy: {:.2f}%\n".format(avg_loss,accuracy))
 
-        print(
-            """
-\nTest set: Average fairness score:\n
+        result = """\n
+Test set:
+Average loss: {:.4f}\n
+Accuracy: {:.2f}%\n
+Average fairness score:\n
 recall: {}\n
-avg_recall_by_group:\n
-{}\n
 avg_eq_odds: {}\n
 avg_tpr: {}\n
 avg_dem_par: {}\n
 cm:\n
 {}\n
-""".format(
+sub_cm:\n
+{}\n
+""".format(avg_loss,accuracy,
                 recall,
-                avg_recall_by_group,
                 avg_eq_odds,
                 avg_tpr,
                 avg_dem_par,
-                cm
-            ))
-        """
+                cm,
+                sub_cm
+            )
+
+        print(result)
         log_dict = {"accuracy": accuracy,
                     "avg_loss": avg_loss,
                     "recall": recall,
@@ -244,14 +279,14 @@ cm:\n
                     "fn": cm[2],
                     "tp": cm[3]
                     }
+        """
         for j in avg_recall_by_group.keys():
             category = sensitive_cat_keys[j]
             value = avg_recall_by_group[j]
             log_dict[category] = value
-
+        """
         print(log_dict)
         wandb.log(log_dict)
-        """
 
 
 

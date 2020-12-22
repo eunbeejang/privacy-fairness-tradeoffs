@@ -101,13 +101,13 @@ class data_loader():
         test_df = test_df.sample(frac=1).reset_index(drop=True)  # shuffle df
 
         if args.num_teachers == 0 or s == 0:
-            train_data = LoadDataset(train_df, args.dataset)
-            test_data = LoadDataset(test_df, args.dataset)
+            train_data = LoadDataset(train_df, args.dataset, args.sensitive)
+            test_data = LoadDataset(test_df, args.dataset, args.sensitive)
 
             self.sensitive_keys = train_data.getkeys()
             self.train_size = len(train_data)
             self.test_size = len(test_data)
-
+            self.sensitive_col_idx = train_data.get_sensitive_idx()
             self.cat_emb_size = train_data.categorical_embedding_sizes  # size of categorical embedding
             print(self.cat_emb_size)
             self.num_conts = train_data.num_numerical_cols  # number of numerical variables
@@ -130,13 +130,15 @@ class data_loader():
             student_train_df = train_df.iloc[:student_train_size, :]
 
 
-            train_data = LoadDataset(teacher_train_df, args.dataset)
-            student_train_data = LoadDataset(student_train_df, args.dataset)
-            test_data = LoadDataset(test_df, args.dataset)
+            train_data = LoadDataset(teacher_train_df, args.dataset, args.sensitive)
+            student_train_data = LoadDataset(student_train_df, args.dataset, args.sensitive)
+            test_data = LoadDataset(test_df, args.dataset, args.sensitive)
 
             self.sensitive_keys = train_data.getkeys()
             self.train_size = len(train_data)
             self.test_size = len(test_data)
+            self.sensitive_col_idx = train_data.get_sensitive_idx()
+
             student_train_size = len(student_train_data)
 
             self.cat_emb_size = train_data.categorical_embedding_sizes  # size of categorical embedding
@@ -200,9 +202,11 @@ class data_loader():
     def student_data(self):
         return self.student_train_loader, self.student_test_loader
 
+    def get_sensitive_idx(self):
+        return  self.sensitive_col_idx
 
 class LoadDataset(Dataset):
-    def __init__(self, data, mode):
+    def __init__(self, data, mode, sensitive_col):
 
         self.len = data.shape[0]
 
@@ -247,9 +251,9 @@ class LoadDataset(Dataset):
             telephone = data['telephone'].cat.codes.values
             foreign_worker = data['foreign_worker'].cat.codes.values
 
-            #            self.cat_dict = dict(enumerate(data['job'].cat.categories))  # 10
-            self.cat_dict = dict(enumerate(data['status_sex'].cat.categories))  # 5
-
+            #self.cat_dict = dict(enumerate(data['job'].cat.categories))  # 10
+            self.cat_dict = dict(enumerate(data[sensitive_col].cat.categories))  # 5
+            self.sensitive_col_idx = categorical_columns.index(sensitive_col)
             print(self.cat_dict)
 
             categorical_data = np.stack([existing_checking, credit_history, purpose,
@@ -283,7 +287,8 @@ class LoadDataset(Dataset):
             day_of_week = data['day_of_week'].cat.codes.values
             poutcome = data['poutcome'].cat.codes.values
             #            self.cat_dict = dict(enumerate(data['education'].cat.categories)) # 2
-            self.cat_dict = dict(enumerate(data['job'].cat.categories))  # 0
+            self.cat_dict = dict(enumerate(data[sensitive_col].cat.categories))  # 0
+            self.sensitive_col_idx = categorical_columns.index(sensitive_col)
 
             #            self.cat_dict = dict(enumerate(data['marital'].cat.categories)) # 1
             print(self.cat_dict)
@@ -315,9 +320,11 @@ class LoadDataset(Dataset):
             race = data['race'].cat.codes.values
             sex = data['sex'].cat.codes.values
             native_country = data['native-country'].cat.codes.values
-            #            self.cat_dict = dict(enumerate(data['education'].cat.categories)) # 1
-            self.cat_dict = dict(enumerate(data['race'].cat.categories))  # 5
+            self.cat_dict = dict(enumerate(data[sensitive_col].cat.categories)) # 1
+            #self.cat_dict = dict(enumerate(data['race'].cat.categories))  # 5
             #            self.cat_dict = dict(enumerate(data['marital-status'].cat.categories)) # 2
+            self.sensitive_col_idx = categorical_columns.index(sensitive_col)
+
             print(self.cat_dict)
 
             categorical_data = np.stack([workclass, education, marital_status,
@@ -345,6 +352,9 @@ class LoadDataset(Dataset):
                                             for col_size in categorical_column_sizes]
 
         self.num_numerical_cols = self.numerical_data.shape[1]
+
+    def get_sensitive_idx(self):
+        return  self.sensitive_col_idx
 
     def getkeys(self):
         return self.cat_dict

@@ -5,16 +5,21 @@ import fairlearn.metrics as flm
 import sklearn.metrics as skm
 from fairlearn.metrics import true_positive_rate
 from fairlearn.metrics import MetricFrame
-
+#from aif360.sklearn.metrics import equal_opportunity_difference
 from collections import Counter
 from sklearn.metrics import confusion_matrix
 import pandas as pd
 from datetime import datetime
+from more_itertools import locate
+from functools import reduce
+
+def mysum(*nums):
+    return reduce(lambda x, y: x+y, nums)
 
 torch.set_printoptions(threshold=5000)
 
 
-def test(args, model, device, test_loader, test_size):
+def test(args, model, device, test_loader, test_size, sensitive_idx):
 
     model.eval()
     criterion = nn.BCELoss()
@@ -35,6 +40,8 @@ def test(args, model, device, test_loader, test_size):
         for cats, conts, target in tqdm(test_loader):
             i += 1
             cats, conts, target = cats.to(device), conts.to(device), target.to(device)
+
+
             output = model(cats, conts)
             test_loss += criterion(output, target).item()  # sum up batch loss
             pred = (output > 0.5).float()
@@ -45,7 +52,7 @@ def test(args, model, device, test_loader, test_size):
             curr_min = curr_datetime.minute
 
             pred_df = pd.DataFrame(pred.numpy())
-            pred_df.to_csv(f"{args.run_name}_{curr_hour}-{curr_min}.csv")
+            pred_df.to_csv(f"pred_results/{args.run_name}_{curr_hour}-{curr_min}.csv")
 
             # confusion matrixç
             tn, fp, fn, tp = confusion_matrix(target, pred, [1, 0]).ravel()
@@ -56,11 +63,19 @@ def test(args, model, device, test_loader, test_size):
 
 
             # position of col for sensitive values
-            sensitive = [i[0].item() for i in cats]
+            sensitive = [i[sensitive_idx].item() for i in cats]
+            cat_len = max(sensitive)
+            sub_cm = []
+            for i in range(cat_len):
+                idx = list(locate(sensitive, lambda x: x == i))
+                sub_tar = target[idx]
+                sub_pred = pred[idx]
 
+                tn, fp, fn, tp = confusion_matrix(sub_tar, sub_pred).ravel()
+                total = mysum(tn,fp,fn,tp)
+                sub_cm.append((tn/total, fp/total, fn/total, tp/total))
 
             # Fairness metrics
-
             group_metrics = MetricFrame(skm.recall_score,
                                              target, pred,
                                               sensitive_features=sensitive)
@@ -83,7 +98,7 @@ def test(args, model, device, test_loader, test_size):
 
             #print("\n", group_metrics.by_group, "\n")
             avg_recall += group_metrics.overall
-            avg_recall_by_group = dict(Counter(avg_recall_by_group)+Counter(group_metrics.by_group))
+            #avg_recall_by_group = dict(Counter(avg_recall_by_group)+Counter(group_metrics.by_group))
             avg_eq_odds += eq_odds
             avg_dem_par += demographic_parity
             avg_tpr += tpr.difference(method='between_groups')
@@ -92,7 +107,7 @@ def test(args, model, device, test_loader, test_size):
     accuracy = 100.0 * correct / test_size
     avg_loss = test_loss
     recall = avg_recall/i
-    avg_recall_by_group = {k: v / i for k, v in avg_recall_by_group.items()}
+    #avg_recall_by_group = {k: v / i for k, v in avg_recall_by_group.items()}
     avg_eq_odds = avg_eq_odds/i
     avg_dem_par = avg_dem_par/i
     avg_tpr = avg_tpr/i
@@ -100,6 +115,7 @@ def test(args, model, device, test_loader, test_size):
     avg_tn = avg_tn/i
     avg_fp = avg_fp/i
     avg_fn = avg_fn/i
-    cm = (avg_tn, avg_fp, avg_fn, avg_tp)
-    return accuracy, avg_loss, recall, avg_recall_by_group, avg_eq_odds, avg_tpr, avg_dem_par, cm
+    total = mysum(avg_tn, avg_fp, avg_fn, avg_tp)
+    cm = (avg_tn/total, avg_fp/total, avg_fn/total, avg_tp/total)
+    return accuracy, avg_loss, recall, avg_eq_odds, avg_tpr, avg_dem_par, cm, sub_cm
 

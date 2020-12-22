@@ -37,6 +37,8 @@ class RegressionModel(nn.Module):
         self.activation = nn.Sigmoid()
 
     def forward(self, x_cat, x_cont):
+
+
         # embedding for categorical variables
         if self.n_emb != 0:
             x = [e(x_cat[:, i]) for i, e in enumerate(self.embs)]
@@ -45,7 +47,7 @@ class RegressionModel(nn.Module):
 
         # embedding for continuous variables
         if self.n_cont != 0:
-            x2 = self.bn(x_cont)
+            x2 = self.bn(x_cont.float())
             x = torch.cat([x, x2], 1) if self.n_emb != 0 else x2
         for l, d, b in zip(self.lins, self.drops, self.bns):
             x = F.relu(l(x))
@@ -61,6 +63,7 @@ class RegressionModel(nn.Module):
 #            x = torch.where(torch.isnan(x), torch.zeros_like(x), x)
 #            x = torch.where(torch.isinf(x), torch.zeros_like(x), x)
         return x.squeeze()
+
 
     def configure_optimizers(self):
         #        optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=0)
