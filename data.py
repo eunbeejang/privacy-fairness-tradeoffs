@@ -242,7 +242,7 @@ class LoadDataset(Dataset):
             purpose = data['purpose'].cat.codes.values
             savings = data['savings'].cat.codes.values
             employment_since = data['employment_since'].cat.codes.values
-            status_sex = data['status_sex'].cat.codes.values
+            status_sex = data['dd'].cat.codes.values
             other_debtors = data['other_debtors'].cat.codes.values
             property = data['property'].cat.codes.values
             other_installment_plans = data['other_installment_plans'].cat.codes.values

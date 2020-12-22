@@ -244,11 +244,13 @@ def main():
             """
 
         #print("\nTest set: Average loss: {:.4f}, Accuracy: {:.2f}%\n".format(avg_loss,accuracy))
-
         result = """\n
-Test set:
+===================
+Test set:{}\n\n
+
 Average loss: {:.4f}\n
-Accuracy: {:.2f}%\n
+Accuracy: {:.2f}%\n\n
+
 Average fairness score:\n
 recall: {}\n
 avg_eq_odds: {}\n
@@ -258,15 +260,21 @@ cm:\n
 {}\n
 sub_cm:\n
 {}\n
-""".format(avg_loss,accuracy,
-                recall,
-                avg_eq_odds,
-                avg_tpr,
-                avg_dem_par,
-                cm,
-                sub_cm
-            )
+""".format(args.run_name,
+               avg_loss,
+               accuracy,
+               recall,
+               avg_eq_odds,
+               avg_tpr,
+               avg_dem_par,
+               cm,
+               sub_cm
+               )
 
+        # append run result
+        file_object = open('out/all_results.txt', 'a')
+        file_object.write(result)
+        file_object.close()
         print(result)
         log_dict = {"accuracy": accuracy,
                     "avg_loss": avg_loss,
