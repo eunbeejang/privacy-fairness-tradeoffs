@@ -67,11 +67,27 @@ def test(args, model, device, test_loader, test_size, sensitive_idx):
             cat_len = max(sensitive)
             sub_cm = []
             for i in range(cat_len):
-                idx = list(locate(sensitive, lambda x: x == i))
-                sub_tar = target[idx]
-                sub_pred = pred[idx]
+                try:
+                    idx = list(locate(sensitive, lambda x: x == i))
+                    sub_tar = target[idx]
+                    sub_pred = pred[idx]
+                    tn, fp, fn, tp = confusion_matrix(sub_tar, sub_pred).ravel()
+                except:
+                    # when only one value to predict
+                    temp_tar = int(sub_tar.numpy()[0])
+                    temp_pred = int(sub_pred.numpy()[0])
+                    #print(tar, pred)
+                    if temp_tar and temp_pred:
+                        tn, fp, fn, tp = 0, 0, 0, 1
+                    elif temp_tar and not temp_pred:
+                        tn, fp, fn, tp = 0, 0, 1, 0
+                    elif not temp_tar and not temp_pred:
+                        tn, fp, fn, tp = 1, 0, 0, 0
+                    elif not temp_tar and temp_pred:
+                        tn, fp, fn, tp = 0, 1, 0, 0
+                    else:
+                        tn, fp, fn, tp = 0, 0, 0, 0
 
-                tn, fp, fn, tp = confusion_matrix(sub_tar, sub_pred).ravel()
                 total = mysum(tn,fp,fn,tp)
                 sub_cm.append((tn/total, fp/total, fn/total, tp/total))
 

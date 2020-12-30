@@ -152,20 +152,20 @@ def main():
             print(sensitive_cat_keys)
         else:
             dataset = data_loader(args, s)
-            train_size, test_size = dataset.__lenls__()
+            train_size, test_size = dataset.__len__()
             teacher_loaders = dataset.train_teachers()
             student_train_loader, student_test_loader = dataset.student_data()
             cat_emb_size, num_conts = dataset.get_input_properties()
             sensitive_cat_keys = dataset.getkeys()
-            sensitive_idx = dataset.sensitive_col_idx()
+            sensitive_idx = dataset.get_sensitive_idx()
             print(sensitive_cat_keys)
 
             print("!!!!!! DATA LOADED")
 
         #run_results = []
 
-        wandb.init(project="privacy-fairness-init", name=args.run_name,  config={
-            #"run_name": args.run_name,
+        wandb.init(project="privacy-fairness-2", name=args.run_name,  config={
+            "run_name": args.run_name,
             "architecture": 'RegressionModel',
             "dataset": args.dataset,
             "batch_size": args.batch_size,
