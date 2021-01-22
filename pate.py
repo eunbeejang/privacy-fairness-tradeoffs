@@ -91,7 +91,7 @@ def student_loader(student_train_loader, labels):
     for i, (cats, conts, target) in enumerate(student_train_loader):
         yield (cats, conts) , torch.from_numpy(labels[i * len(cats): (i + 1) * len(cats)])
 
-def test_student(args, student_train_loader, student_labels, student_test_loader, cat_emb_size, num_conts, device, sensitive_idx):
+def test_student(args, student_train_loader, student_labels, student_test_loader, test_size, cat_emb_size, num_conts, device, sensitive_idx):
     student_model = RegressionModel(emb_szs=cat_emb_size,
                     n_cont=num_conts,
                     emb_drop=0.04,
@@ -126,7 +126,8 @@ def test_student(args, student_train_loader, student_labels, student_test_loader
         #            if steps % 50 == 0:
             test_loss = 0
             correct = 0
-            total = 0
+            #total = 0
+            current_total = 0
             i = 0
 
             avg_recall = 0
@@ -155,28 +156,47 @@ def test_student(args, student_train_loader, student_labels, student_test_loader
                     pred_df = pd.DataFrame(pred.numpy())
                     pred_df.to_csv(f"pred_results/{args.run_name}_{curr_hour}-{curr_min}.csv")
 
-                    correct += np.sum(np.squeeze(pred.eq(target.data.view_as(pred))).cpu().numpy())
-                    total += cats.size(0)
+                    #print(pred, np.sum(np.squeeze(pred.eq(target.data.view_as(pred))).cpu().numpy()))
+                    #correct += np.sum(np.squeeze(pred.eq(target.data.view_as(pred))).cpu().numpy())
+                    #total += cats.size(0)
 
                     # confusion matrixç
                     tn, fp, fn, tp = confusion_matrix(target, pred, [1, 0]).ravel()
-                    avg_tp += tn
+                    avg_tn += tn
                     avg_fp += fp
                     avg_fn += fn
                     avg_tp += tp
                     # position of col for sensitive values
+                    correct += tp + tn
+                    # position of col for sensitive values
                     sensitive = [i[sensitive_idx].item() for i in cats]
-
-                    cat_len = max(sensitive)
+                    cat_len = len(sensitive)
                     sub_cm = []
-                    for i in range(cat_len):
-                        idx = list(locate(sensitive, lambda x: x == i))
-                        sub_tar = target[idx]
-                        sub_pred = pred[idx]
+                    for j in range(cat_len):
+                        try:
+                            idx = list(locate(sensitive, lambda x: x == j))
+                            sub_tar = target[idx]
+                            sub_pred = pred[idx]
+                            tn, fp, fn, tp = confusion_matrix(sub_tar, sub_pred).ravel()
+                        except:
+                            # when only one value to predict
+                            temp_tar = int(sub_tar.numpy()[0])
+                            temp_pred = int(sub_pred.numpy()[0])
+                            # print(tar, pred)
+                            if temp_tar and temp_pred:
+                                tn, fp, fn, tp = 0, 0, 0, 1
+                            elif temp_tar and not temp_pred:
+                                tn, fp, fn, tp = 0, 0, 1, 0
+                            elif not temp_tar and not temp_pred:
+                                tn, fp, fn, tp = 1, 0, 0, 0
+                            elif not temp_tar and temp_pred:
+                                tn, fp, fn, tp = 0, 1, 0, 0
+                            else:
+                                tn, fp, fn, tp = 0, 0, 0, 0
 
-                        tn, fp, fn, tp = confusion_matrix(sub_tar, sub_pred).ravel()
-                        total = mysum(tn, fp, fn, tp)
-                        sub_cm.append((tn / total, fp / total, fn / total, tp / total))
+                        current_total = mysum(tn, fp, fn, tp)
+                        total += current_total
+                        sub_cm.append((tn / current_total, fp / current_total, fn / current_total, tp / current_total))
 
                     # Fairness metrics
 
@@ -205,11 +225,15 @@ def test_student(args, student_train_loader, student_labels, student_test_loader
                     avg_dem_par += demographic_parity
                     avg_tpr += tpr.difference(method='between_groups')
 
+            total = mysum(avg_tn, avg_fp, avg_fn, avg_tp)
+            cm = (avg_tn / total, avg_fp / total, avg_fn / total, avg_tp / total)
+
             test_loss /= total
-            accuracy = 100.0 * correct / total
+            accuracy = correct / total
             avg_loss = test_loss
             recall = avg_recall / i
             #avg_recall_by_group = {k: v / i for k, v in avg_recall_by_group.items()}
+            """
             avg_eq_odds = avg_eq_odds / i
             avg_dem_par = avg_dem_par / i
             avg_tpr = avg_tpr / i
@@ -217,8 +241,7 @@ def test_student(args, student_train_loader, student_labels, student_test_loader
             avg_tn = avg_tn / i
             avg_fp = avg_fp / i
             avg_fn = avg_fn / i
-            total = mysum(avg_tn, avg_fp, avg_fn, avg_tp)
-            cm = (avg_tn / total, avg_fp / total, avg_fn / total, avg_tp / total)
+            """
             return accuracy, avg_loss, recall, avg_eq_odds, avg_tpr, avg_dem_par, cm, sub_cm
 
 

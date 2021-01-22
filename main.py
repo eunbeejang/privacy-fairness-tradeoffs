@@ -233,7 +233,7 @@ def main():
             teacher_models = train_models(args, model, teacher_loaders, criterion, optimizer, device)
             preds, student_labels = aggregated_teacher(teacher_models, student_train_loader, s, device)
 
-            accuracy, avg_loss, recall, avg_eq_odds, avg_tpr, avg_dem_par, cm, sub_cm = test_student(args, student_train_loader, student_labels, student_test_loader, cat_emb_size, num_conts,
+            accuracy, avg_loss, recall, avg_eq_odds, avg_tpr, avg_dem_par, cm, sub_cm = test_student(args, student_train_loader, student_labels, student_test_loader, test_size, cat_emb_size, num_conts,
                          device, sensitive_idx)
 
             """

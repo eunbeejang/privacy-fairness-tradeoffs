@@ -38,7 +38,8 @@ def test(args, model, device, test_loader, test_size, sensitive_idx):
     avg_fn = 0
     with torch.no_grad():
         for cats, conts, target in tqdm(test_loader):
-            i += 1
+            print("*********")
+            #i += 1
             cats, conts, target = cats.to(device), conts.to(device), target.to(device)
 
 
@@ -56,19 +57,19 @@ def test(args, model, device, test_loader, test_size, sensitive_idx):
 
             # confusion matrixç
             tn, fp, fn, tp = confusion_matrix(target, pred, [1, 0]).ravel()
-            avg_tp+=tn
+            avg_tn+=tn
             avg_fp+=fp
             avg_fn+=fn
             avg_tp+=tp
-
 
             # position of col for sensitive values
             sensitive = [i[sensitive_idx].item() for i in cats]
             cat_len = max(sensitive)
             sub_cm = []
-            for i in range(cat_len):
+            #print(cat_len)
+            for j in range(cat_len):
                 try:
-                    idx = list(locate(sensitive, lambda x: x == i))
+                    idx = list(locate(sensitive, lambda x: x == j))
                     sub_tar = target[idx]
                     sub_pred = pred[idx]
                     tn, fp, fn, tp = confusion_matrix(sub_tar, sub_pred).ravel()
@@ -119,9 +120,13 @@ def test(args, model, device, test_loader, test_size, sensitive_idx):
             avg_dem_par += demographic_parity
             avg_tpr += tpr.difference(method='between_groups')
 
+    print(i)
+    total = mysum(avg_tn, avg_fp, avg_fn, avg_tp)
+    cm = (avg_tn/total, avg_fp/total, avg_fn/total, avg_tp/total)
     test_loss /= test_size
-    accuracy = 100.0 * correct / test_size
+    accuracy = correct / test_size
     avg_loss = test_loss
+    """
     recall = avg_recall/i
     #avg_recall_by_group = {k: v / i for k, v in avg_recall_by_group.items()}
     avg_eq_odds = avg_eq_odds/i
@@ -131,7 +136,7 @@ def test(args, model, device, test_loader, test_size, sensitive_idx):
     avg_tn = avg_tn/i
     avg_fp = avg_fp/i
     avg_fn = avg_fn/i
-    total = mysum(avg_tn, avg_fp, avg_fn, avg_tp)
-    cm = (avg_tn/total, avg_fp/total, avg_fn/total, avg_tp/total)
-    return accuracy, avg_loss, recall, avg_eq_odds, avg_tpr, avg_dem_par, cm, sub_cm
+    """
+
+    return accuracy, avg_loss, avg_recall, avg_eq_odds, avg_tpr, avg_dem_par, cm, sub_cm
 

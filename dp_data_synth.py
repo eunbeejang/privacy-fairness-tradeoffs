@@ -48,7 +48,21 @@ def main():
     args = parser.parse_args()
     if args.data == 'bank':
         input_file = './bank-data/bank-additional-full.csv'
-        df = pd.read_csv(input_file, sep=';')
+        cols = ['age', 'job', 'marital', 'education',
+                'default', 'housing', 'loan', 'contact',
+                'month', 'day_of_week', 'duration',
+                'campaign', 'pdays', 'previous', 'poutcome',
+                'emp.var.rate', 'cons.price.idx', 'cons.conf.idx', 'euribor3m',
+                'nr.employed', 'y']
+        df = pd.read_csv(input_file, sep=';', names=cols)
+        categorical_columns = ['job', 'marital',
+                               'education', 'default', 'housing',
+                               'loan', 'contact', 'month',
+                               'day_of_week', 'poutcome']
+
+        for category in categorical_columns:
+            df[category] = df[category].astype('object')
+
         # specify categorical attributes
         categorical_attributes = {'age': True,
                                   'job': True,
@@ -76,6 +90,7 @@ def main():
         categorical_columns = ['workclass', 'education', 'marital-status',
                                'occupation', 'relationship', 'race',
                                'sex', 'native-country']
+
         for category in categorical_columns:
             df[category] = df[category].astype('object')
 
@@ -92,13 +107,54 @@ def main():
         output_dir = './adult-data/synth'
         sep = ','
 
+    elif args.data == 'german':
+        input_file = './german-data/german.train'
+        cols = ['existing_checking', 'duration', 'credit_history', 'purpose', 'credit_amount',
+                'savings', 'employment_since', 'installment_rate', 'status_sex', 'other_debtors',
+                'residence_since', 'property', 'age', 'other_installment_plans', 'housing',
+                'existing_credits', 'job', 'people_liable', 'telephone', 'foreign_worker', 'y']
+
+        df = pd.read_csv(input_file, sep=' ', names=cols)
+        categorical_columns = ['existing_checking',
+                               'credit_history',
+                               'purpose',
+                               'savings',
+                               'employment_since',
+                               'status_sex',
+                               'other_debtors',
+                               'property',
+                               'other_installment_plans',
+                               'housing',
+                               'job',
+                               'telephone',
+                               'foreign_worker']
+        for category in categorical_columns:
+            df[category] = df[category].astype('object')
+
+        categorical_attributes = {'existing_checking': True,
+                                  'credit_history': True,
+                                  'purpose': True,
+                                  'savings': True,
+                                  'employment_since': True,
+                                  'status_sex': True,
+                                  'other_debtors': True,
+                                  'property': True,
+                                  'other_installment_plans': True,
+                                  'housing': True,
+                                  'job': True,
+                                  'telephone': True,
+                                  'foreign_worker': True,
+                                  'y': True}
+        output_dir = './german-data/synth'
+        sep = ' '
+
     #df = df.dropna()
 
     # input to DataSynthetizer must be comma separated. Create a temp file.
     df.to_csv('comma_data.csv', sep=',')
     input_data = 'comma_data.csv'
 
-    description_file = output_dir + '/description.json'
+    description_file = output_dir + '/description' + args.mode + '_' + str(args.epsilon) + '.json'
     synthetic_data = ''
     save_path = ''
     # An attribute is categorical if its domain size is less than this threshold.
@@ -123,8 +179,8 @@ def main():
     # Data describer
     describer = DataDescriber(category_threshold=threshold_value)
     if args.mode == 'independent':
-        synthetic_data = output_dir + '/syth_data_independent.csv'
-        save_path = output_dir + '/syth_data_independent_ymod.csv'
+        synthetic_data = output_dir + '/syth_data_independent_' + str(args.epsilon) +'.csv'
+        save_path = output_dir + '/syth_data_independent_ymod_' + str(args.epsilon) +'.csv'
 
         describer.describe_dataset_in_independent_attribute_mode(dataset_file=input_data,
                                                                  attribute_to_is_categorical=categorical_attributes,
@@ -133,8 +189,8 @@ def main():
         describer.save_dataset_description_to_file(description_file)
 
     elif args.mode == 'correlated':
-        synthetic_data = output_dir + '/syth_data_correlated.csv'
-        save_path = output_dir + '/syth_data_correlated_ymod.csv'
+        synthetic_data = output_dir + '/syth_data_correlated_'+ str(args.epsilon) +'.csv'
+        save_path = output_dir + '/syth_data_correlated_ymod_'+ str(args.epsilon) +'.csv'
 
         describer.describe_dataset_in_correlated_attribute_mode(dataset_file=input_data,
                                                                 epsilon=args.epsilon,
@@ -147,8 +203,8 @@ def main():
         print(display_bayesian_network(describer.bayesian_network))
 
     else:
-        synthetic_data = output_dir + '/syth_data_random.csv'
-        save_path = output_dir + '/syth_data_random_ymod.csv'
+        synthetic_data = output_dir + '/syth_data_random_' + str(args.epsilon) +'.csv'
+        save_path = output_dir + '/syth_data_random_ymod_' + str(args.epsilon) +'.csv'
 
         describer.describe_dataset_in_random_mode(input_data)
 
@@ -175,7 +231,6 @@ def main():
     # Delete temporary file (comma separated df)
     if os.path.exists(input_data):
         os.remove(input_data)
-
 
     synth_df = pd.read_csv(synthetic_data, sep=',')
     synth_df['y'] = df['y']
