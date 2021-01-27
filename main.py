@@ -226,14 +226,14 @@ def main():
             exit():q
             
             """
-            accuracy, avg_loss, recall, avg_eq_odds, avg_tpr, avg_dem_par, cm, sub_cm = test(args, model, device, test_data, test_size, sensitive_idx)
+            accuracy, avg_loss, avg_precision, avg_recall, avg_eq_odds, avg_tpr, avg_dem_par, cm, sub_cm, overall_results = test(args, model, device, test_data, test_size, sensitive_idx)
         else:  # PATE MODEL
             print("!!!!!! ENTERED HERE")
 
             teacher_models = train_models(args, model, teacher_loaders, criterion, optimizer, device)
             preds, student_labels = aggregated_teacher(teacher_models, student_train_loader, s, device)
 
-            accuracy, avg_loss, recall, avg_eq_odds, avg_tpr, avg_dem_par, cm, sub_cm = test_student(args, student_train_loader, student_labels, student_test_loader, test_size, cat_emb_size, num_conts,
+            accuracy, avg_loss, avg_precision, avg_recall, avg_eq_odds, avg_tpr, avg_dem_par, cm, sub_cm, overall_results = test_student(args, student_train_loader, student_labels, student_test_loader, test_size, cat_emb_size, num_conts,
                          device, sensitive_idx)
 
             """
@@ -244,32 +244,34 @@ def main():
             """
 
         #print("\nTest set: Average loss: {:.4f}, Accuracy: {:.2f}%\n".format(avg_loss,accuracy))
-        result = """\n
+        result = """
 ===================
-Test set:{}\n\n
-
-Average loss: {:.4f}\n
-Accuracy: {:.2f}%\n\n
-
-Average fairness score:\n
-recall: {}\n
-avg_eq_odds: {}\n
-avg_tpr: {}\n
-avg_dem_par: {}\n
-cm:\n
-{}\n
-sub_cm:\n
-{}\n
+Test set: {}
+Average loss: {:.4f}
+Accuracy: {:.4f}
+precision: {:.4f}
+recall: {:.4f}
+sub_pre_rec:
+{}
+cm:
+{}
+sub_cm:
+{}
+avg_eq_odds: {:.4f}
+avg_tpr: {:.4f}
+avg_dem_par: {:.4f}
 """.format(args.run_name,
-               avg_loss,
-               accuracy,
-               recall,
-               avg_eq_odds,
-               avg_tpr,
-               avg_dem_par,
-               cm,
-               sub_cm
-               )
+           avg_loss,
+           accuracy,
+           avg_precision,
+           avg_recall,
+           overall_results,
+           avg_eq_odds,
+           avg_tpr,
+           avg_dem_par,
+           cm,
+           sub_cm
+           )
 
         # append run result
         file_object = open('out/all_results.txt', 'a')
@@ -278,7 +280,8 @@ sub_cm:\n
         print(result)
         log_dict = {"accuracy": accuracy,
                     "avg_loss": avg_loss,
-                    "recall": recall,
+                    "precision": avg_precision,
+                    "recall": avg_recall,
                     "avg_eq_odds": avg_eq_odds,
                     "avg_tpr": avg_tpr,
                     "avg_dem_par": avg_dem_par,
