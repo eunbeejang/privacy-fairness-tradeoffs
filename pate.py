@@ -124,14 +124,13 @@ def test_student(args, student_train_loader, student_labels, student_test_loader
             running_loss += loss.item()
 
         #            if steps % 50 == 0:
+            student_model.eval()
             test_loss = 0
             correct = 0
-            #total = 0
-            current_total = 0
             i = 0
 
             avg_recall = 0
-            avg_recall_by_group = {}
+
             avg_eq_odds = 0
             avg_dem_par = 0
             avg_tpr = 0
@@ -140,7 +139,6 @@ def test_student(args, student_train_loader, student_labels, student_test_loader
             avg_fp = 0
             avg_fn = 0
 
-            student_model.eval()
             with torch.no_grad():
                 for batch_idx, (cats, conts, target) in enumerate(student_test_loader):
                     i+=1
@@ -148,6 +146,7 @@ def test_student(args, student_train_loader, student_labels, student_test_loader
                     loss += criterion(output, target).item()
                     test_loss = test_loss + ((1 / (batch_idx + 1)) * (loss.data - test_loss))
                     pred = (output > 0.5).float()
+                    correct += pred.eq(target.view_as(pred)).sum().item()
 
                     curr_datetime = datetime.now()
                     curr_hour = curr_datetime.hour
@@ -160,18 +159,19 @@ def test_student(args, student_train_loader, student_labels, student_test_loader
                     #correct += np.sum(np.squeeze(pred.eq(target.data.view_as(pred))).cpu().numpy())
                     #total += cats.size(0)
 
+
                     # confusion matrixç
                     tn, fp, fn, tp = confusion_matrix(target, pred, [1, 0]).ravel()
                     avg_tn += tn
                     avg_fp += fp
                     avg_fn += fn
                     avg_tp += tp
-                    # position of col for sensitive values
-                    correct += tp + tn
+
                     # position of col for sensitive values
                     sensitive = [i[sensitive_idx].item() for i in cats]
-                    cat_len = len(sensitive)
+                    cat_len = max(sensitive)
                     sub_cm = []
+                    # print(cat_len)
                     for j in range(cat_len):
                         try:
                             idx = list(locate(sensitive, lambda x: x == j))
@@ -194,9 +194,8 @@ def test_student(args, student_train_loader, student_labels, student_test_loader
                             else:
                                 tn, fp, fn, tp = 0, 0, 0, 0
 
-                        current_total = mysum(tn, fp, fn, tp)
-                        total += current_total
-                        sub_cm.append((tn / current_total, fp / current_total, fn / current_total, tp / current_total))
+                        total = mysum(tn, fp, fn, tp)
+                        sub_cm.append((tn / total, fp / total, fn / total, tp / total))
 
                     # Fairness metrics
 
@@ -218,20 +217,19 @@ def test_student(args, student_train_loader, student_labels, student_test_loader
 
                     # tpr = flm.true_positive_rate(target, pred,sample_weight=sensitive)
 
-                    # print("\n", group_metrics.by_group, "\n")
+
                     avg_recall += group_metrics.overall
                     #avg_recall_by_group = dict(Counter(avg_recall_by_group) + Counter(group_metrics.by_group))
                     avg_eq_odds += eq_odds
                     avg_dem_par += demographic_parity
                     avg_tpr += tpr.difference(method='between_groups')
+                    print("+++", group_metrics.overall, eq_odds, demographic_parity, tpr.difference)
 
             total = mysum(avg_tn, avg_fp, avg_fn, avg_tp)
             cm = (avg_tn / total, avg_fp / total, avg_fn / total, avg_tp / total)
-
-            test_loss /= total
-            accuracy = correct / total
+            test_loss /= test_size
+            accuracy = correct / test_size
             avg_loss = test_loss
-            recall = avg_recall / i
             #avg_recall_by_group = {k: v / i for k, v in avg_recall_by_group.items()}
             """
             avg_eq_odds = avg_eq_odds / i
@@ -242,7 +240,9 @@ def test_student(args, student_train_loader, student_labels, student_test_loader
             avg_fp = avg_fp / i
             avg_fn = avg_fn / i
             """
-            return accuracy, avg_loss, recall, avg_eq_odds, avg_tpr, avg_dem_par, cm, sub_cm
+            print(accuracy, avg_loss, avg_recall, avg_eq_odds, avg_tpr, avg_dem_par, cm, sub_cm)
+            exit()
+            return accuracy, avg_loss, avg_recall, avg_eq_odds, avg_tpr, avg_dem_par, cm, sub_cm
 
 
 

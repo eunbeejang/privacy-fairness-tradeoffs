@@ -28,7 +28,7 @@ def test(args, model, device, test_loader, test_size, sensitive_idx):
     i = 0
 
     avg_recall = 0
-    avg_recall_by_group = {}
+
     avg_eq_odds = 0
     avg_dem_par = 0
     avg_tpr = 0

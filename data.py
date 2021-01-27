@@ -19,17 +19,17 @@ class data_loader():
 
         elif args.dataset == 'german-pre-dp':
             if s == 1.0:
-                train_path = 'german-data/synth/syth_data_correlated_ymod_1.0.csv'
+                train_path = 'german-data/synth/syth_data_correlated_1.0.csv'
             elif s == 0.85:
-                train_path = 'german-data/synth/syth_data_correlated_ymod_0.85.csv'
+                train_path = 'german-data/synth/syth_data_correlated_0.85.csv'
             elif s == 0.6:
-                train_path = 'german-data/synth/syth_data_correlated_ymod_0.6.csv'
+                train_path = 'german-data/synth/syth_data_correlated_0.6.csv'
             elif s == 0.45:
-                train_path = 'german-data/synth/syth_data_correlated_ymod_0.45.csv'
+                train_path = 'german-data/synth/syth_data_correlated_0.45.csv'
             elif s == 0.3:
-                train_path = 'german-data/synth/syth_data_correlated_ymod_0.3.csv'
+                train_path = 'german-data/synth/syth_data_correlated_0.3.csv'
             elif s == 0.15:
-                train_path = 'german-data/synth/syth_data_correlated_ymod_0.15.csv'
+                train_path = 'german-data/synth/syth_data_correlated_0.15.csv'
             else:
                 train_path = 'german-data/german.train'
 
@@ -80,11 +80,16 @@ class data_loader():
                     'existing_credits', 'job', 'people_liable', 'telephone', 'foreign_worker', 'y']
 
             test_path = 'german-data/german.test'
-            train_df = pd.read_csv(train_path, sep=' ', names=cols)
+            if args.dataset == 'german-pre-dp':
+                sep = ','
+            else:
+                sep = ' '
+            train_df = pd.read_csv(train_path, sep=sep, names=cols)
             test_df = pd.read_csv(test_path, sep=' ', names=cols)
 
             train_df['y'] = train_df['y'].apply(lambda x: 0 if x == 2 else 1)
             test_df['y'] = test_df['y'].apply(lambda x: 0 if x == 2 else 1)
+            print(train_df)
 
         if args.dataset == 'bank' or args.dataset == 'bank-pre-dp':
             cols = ['age', 'job', 'marital', 'education',
