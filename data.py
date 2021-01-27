@@ -80,7 +80,7 @@ class data_loader():
                     'existing_credits', 'job', 'people_liable', 'telephone', 'foreign_worker', 'y']
 
             test_path = 'german-data/german.test'
-            if args.dataset == 'german-pre-dp':
+            if args.dataset == 'german-pre-dp'and s > 0:
                 sep = ','
             else:
                 sep = ' '

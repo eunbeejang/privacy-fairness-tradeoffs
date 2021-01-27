@@ -242,13 +242,18 @@ def main():
             print("Data Independent Epsilon:", data_ind_eps)
             print("Data Dependent Epsilon:", data_dep_eps)
             """
-
+        
+        
+        #t = [accuracy, avg_loss, avg_precision, avg_recall, avg_eq_odds, avg_tpr, avg_dem_par, cm, sub_cm, overall_results]
+        #[print(type(i)) for i in t]
+        
         #print("\nTest set: Average loss: {:.4f}, Accuracy: {:.2f}%\n".format(avg_loss,accuracy))
         result = """
 ===================
 Test set: {}
-Average loss: {:.4f}
-Accuracy: {:.4f}
+
+accuracy: {:.4f}
+average loss: {:.4f}
 precision: {:.4f}
 recall: {:.4f}
 sub_pre_rec:
@@ -261,20 +266,21 @@ avg_eq_odds: {:.4f}
 avg_tpr: {:.4f}
 avg_dem_par: {:.4f}
 """.format(args.run_name,
+           accuracy,   
            avg_loss,
-           accuracy,
            avg_precision,
            avg_recall,
            overall_results,
+           cm,
+           sub_cm,
            avg_eq_odds,
            avg_tpr,
-           avg_dem_par,
-           cm,
-           sub_cm
+           avg_dem_par
            )
 
         # append run result
-        file_object = open('out/all_results.txt', 'a')
+        file_path = 'out//all_results.' + args.run_name
+        file_object = open(file_path, 'a+')
         file_object.write(result)
         file_object.close()
         print(result)
