@@ -75,25 +75,25 @@ def test(args, model, device, test_loader, test_size, sensitive_idx):
                     idx = list(locate(sensitive, lambda x: x == j))
                     sub_tar = target[idx]
                     sub_pred = pred[idx]
-                    tn, fp, fn, tp = confusion_matrix(sub_tar, sub_pred).ravel()
+                    sub_tn, sub_fp, sub_fn, sub_tp = confusion_matrix(sub_tar, sub_pred).ravel()
                 except:
                     # when only one value to predict
                     temp_tar = int(sub_tar.numpy()[0])
                     temp_pred = int(sub_pred.numpy()[0])
                     #print(tar, pred)
                     if temp_tar and temp_pred:
-                        tn, fp, fn, tp = 0, 0, 0, 1
+                        sub_tn, sub_fp, sub_fn, sub_tp = 0, 0, 0, 1
                     elif temp_tar and not temp_pred:
-                        tn, fp, fn, tp = 0, 0, 1, 0
+                        sub_tn, sub_fp, sub_fn, sub_tp = 0, 0, 1, 0
                     elif not temp_tar and not temp_pred:
-                        tn, fp, fn, tp = 1, 0, 0, 0
+                        sub_tn, sub_fp, sub_fn, sub_tp = 1, 0, 0, 0
                     elif not temp_tar and temp_pred:
-                        tn, fp, fn, tp = 0, 1, 0, 0
+                        sub_tn, sub_fp, sub_fn, sub_tp = 0, 1, 0, 0
                     else:
-                        tn, fp, fn, tp = 0, 0, 0, 0
+                        sub_tn, sub_fp, sub_fn, sub_tp = 0, 0, 0, 0
 
-                total = mysum(tn,fp,fn,tp)
-                sub_cm.append((tn/total, fp/total, fn/total, tp/total))
+                total = mysum(sub_tn, sub_fp, sub_fn, sub_tp)
+                sub_cm.append((sub_tn/total, sub_fp/total, sub_fn/total, sub_tp/total))
 
             # Fairness metrics
             group_metrics = MetricFrame({'precision': skm.precision_score, 'recall': skm.recall_score},
@@ -133,4 +133,5 @@ def test(args, model, device, test_loader, test_size, sensitive_idx):
 
 
     return accuracy, avg_loss, avg_precision, avg_recall, avg_eq_odds, avg_tpr, avg_dem_par, cm, sub_cm, overall_results
+
 
