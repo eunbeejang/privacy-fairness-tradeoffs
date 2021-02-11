@@ -12,66 +12,43 @@ class data_loader():
     def __init__(self, args, s):
 
         # bank data --> sep=';'
-        # adult data --> sep=','
+        # adult, home data --> sep=','
         # german data --> sep=' '
         if args.dataset == 'german':
             train_path = 'german-data/german.train'
 
         elif args.dataset == 'german-pre-dp':
-            if s == 1.0:
-                train_path = 'german-data/synth/syth_data_correlated_1.0.csv'
-            elif s == 0.85:
-                train_path = 'german-data/synth/syth_data_correlated_0.85.csv'
-            elif s == 0.6:
-                train_path = 'german-data/synth/syth_data_correlated_0.6.csv'
-            elif s == 0.45:
-                train_path = 'german-data/synth/syth_data_correlated_0.45.csv'
-            elif s == 0.3:
-                train_path = 'german-data/synth/syth_data_correlated_0.3.csv'
-            elif s == 0.15:
-                train_path = 'german-data/synth/syth_data_correlated_0.15.csv'
-            else:
+            if s == 0:
                 train_path = 'german-data/german.train'
+            else:
+                train_path = 'german-data/synth/syth_data_correlated_{}.csv'.format(s)
 
         if args.dataset == 'bank':
             train_path = 'bank-data/bank-additional-full.csv'
 
         elif args.dataset == 'bank-pre-dp':
-            #1.0, 0.85, 0.6, 0.45, 0.3, 0.15
-            'bank-data/synth/syth_data_correlated_ymod_1.0.csv'
-            if s == 1.0:
-                train_path = 'bank-data/synth/syth_data_correlated_ymod_1.0.csv'
-            elif s == 0.85:
-                train_path = 'bank-data/synth/syth_data_correlated_ymod_0.85.csv'
-            elif s == 0.6:
-                train_path = 'bank-data/synth/syth_data_correlated_ymod_0.6.csv'
-            elif s == 0.45:
-                train_path = 'bank-data/synth/syth_data_correlated_ymod_0.45.csv'
-            elif s == 0.3:
-                train_path = 'bank-data/synth/syth_data_correlated_ymod_0.3.csv'
-            elif s == 0.15:
-                train_path = 'bank-data/synth/syth_data_correlated_ymod_0.15.csv'
-            else:
+            if s == 0:
                 train_path = 'bank-data/bank-additional-full.csv'
+            else:
+                train_path = 'bank-data/synth/syth_data_correlated_ymod_{}.csv'.format(s)
 
         elif args.dataset == 'adult':
             train_path = 'adult-data/adult.data'
 
         elif args.dataset == 'adult-pre-dp':
-            if s == 1.0:
-                train_path = 'adult-data/synth/syth_data_correlated_ymod_1.0.csv'
-            elif s == 0.85:
-                train_path = 'adult-data/synth/syth_data_correlated_ymod_0.85.csv'
-            elif s == 0.6:
-                train_path = 'adult-data/synth/syth_data_correlated_ymod_0.6.csv'
-            elif s == 0.45:
-                train_path = 'adult-data/synth/syth_data_correlated_ymod_0.45.csv'
-            elif s == 0.3:
-                train_path = 'adult-data/synth/syth_data_correlated_ymod_0.3.csv'
-            elif s == 0.15:
-                train_path = 'adult-data/synth/syth_data_correlated_ymod_0.15.csv'
-            else:
+            if s == 0:
                 train_path = 'adult-data/adult.data'
+            else:
+                train_path = 'adult-data/synth/syth_data_correlated_ymod_{}.csv'.format(s)
+
+        elif args.dataset == 'home':
+            train_path = 'home-data/hcdf_train.csv'
+
+        elif args.dataset == 'home-pre-dp':
+            if s == 0:
+                train_path = 'home-data/hcdf_train.csv'
+            else:
+                train_path = 'home-data/synth/syth_data_correlated_ymod_{}.csv'.format(s)
 
         if args.dataset == 'german' or args.dataset == 'german-pre-dp':
             cols = ['existing_checking', 'duration', 'credit_history', 'purpose', 'credit_amount',
@@ -119,11 +96,23 @@ class data_loader():
             train_df['y'] = train_df['y'].apply(lambda x: 0 if ">50K" in x else 1)
             test_df['y'] = test_df['y'].apply(lambda x: 0 if ">50K" in x else 1)
 
+        elif args.dataset == 'home' or args.dataset == 'home-pre-dp':
+            test_path = 'home-data/hcdf_test.csv'
+
+            train_df = pd.read_csv(train_path, sep=',', header=0)
+            test_df = pd.read_csv(test_path, sep=',', header=0)
+
+            train_df = train_df.drop(columns=['FLAG_OWN_CAR'])
+            test_df = test_df.drop(columns=['FLAG_OWN_CAR'])
+
+            train_df = train_df.rename(columns={"TARGET": "y", "CODE_GENDER": "GENDER"})
+            test_df = test_df.rename(columns={"TARGET": "y", "CODE_GENDER": "GENDER"})
+
         train_df = train_df.dropna()
         test_df = test_df.dropna()
 
         train_df = train_df.sample(frac=1).reset_index(drop=True)  # shuffle df
-        test_df = test_df.sample(frac=1).reset_index(drop=True)  # shuffle df
+        #test_df = test_df.sample(frac=1).reset_index(drop=True)  # shuffle df
 
         if args.num_teachers == 0 or s == 0:
             train_data = LoadDataset(train_df, args.dataset, args.sensitive)
@@ -134,7 +123,7 @@ class data_loader():
             self.test_size = len(test_data)
             self.sensitive_col_idx = train_data.get_sensitive_idx()
             self.cat_emb_size = train_data.categorical_embedding_sizes  # size of categorical embedding
-            print(self.cat_emb_size)
+            print("***", self.cat_emb_size)
             self.num_conts = train_data.num_numerical_cols  # number of numerical variables
 
             class_count = dict(train_df.y.value_counts())
@@ -356,6 +345,68 @@ class LoadDataset(Dataset):
                                          occupation, relationship, race,
                                          sex, native_country], 1)
 
+        elif mode == 'home' or mode == 'home-pre-dp':
+
+            # define data column types
+            categorical_columns = ["NAME_CONTRACT_TYPE", "GENDER",
+                                    "FLAG_OWN_REALTY",
+                                   "NAME_TYPE_SUITE", "NAME_INCOME_TYPE",
+                                   "NAME_EDUCATION_TYPE", "NAME_FAMILY_STATUS",
+                                   "NAME_HOUSING_TYPE", "OCCUPATION_TYPE",
+                                   "WEEKDAY_APPR_PROCESS_START", "ORGANIZATION_TYPE",
+                                   "FONDKAPREMONT_MODE", "HOUSETYPE_MODE",
+                                   "WALLSMATERIAL_MODE", "EMERGENCYSTATE_MODE"]
+
+            numerical_columns = set(data.columns)
+            numerical_columns.remove('y')
+            numerical_columns.difference_update(categorical_columns)
+
+            print(data.head())
+            # categorical variables
+            for category in categorical_columns:
+                data[category] = data[category].astype('category')
+
+            contract = data['NAME_CONTRACT_TYPE'].cat.codes.values
+            gender = data['GENDER'].cat.codes.values
+            realty = data['FLAG_OWN_REALTY'].cat.codes.values
+            suite = data['NAME_TYPE_SUITE'].cat.codes.values
+            income = data['NAME_INCOME_TYPE'].cat.codes.values
+            education = data['NAME_EDUCATION_TYPE'].cat.codes.values
+            family = data['NAME_FAMILY_STATUS'].cat.codes.values
+            housing = data['NAME_HOUSING_TYPE'].cat.codes.values
+            occupation = data['OCCUPATION_TYPE'].cat.codes.values
+            process = data['WEEKDAY_APPR_PROCESS_START'].cat.codes.values
+            organization = data['ORGANIZATION_TYPE'].cat.codes.values
+            fondkaprement = data['FONDKAPREMONT_MODE'].cat.codes.values
+            housetype = data['HOUSETYPE_MODE'].cat.codes.values
+            wallsmaterial = data['WALLSMATERIAL_MODE'].cat.codes.values
+            emergencystate = data['EMERGENCYSTATE_MODE'].cat.codes.values
+
+            self.cat_dict = dict(enumerate(data[sensitive_col].cat.categories)) # 1
+            #self.cat_dict = dict(enumerate(data['race'].cat.categories))  # 5
+            #            self.cat_dict = dict(enumerate(data['marital-status'].cat.categories)) # 2
+            self.sensitive_col_idx = categorical_columns.index(sensitive_col)
+
+            #print(self.cat_dict)
+
+            categorical_data = np.stack([contract,
+                                         gender,
+                                         realty,
+                                         suite,
+                                         income,
+                                         education,
+                                         family,
+                                         housing,
+                                         occupation,
+                                         process,
+                                         organization,
+                                         fondkaprement,
+                                         housetype,
+                                         wallsmaterial,
+                                         emergencystate
+                                        ], 1)
+
+
         self.categorical_data = torch.tensor(categorical_data, dtype=torch.int64)
 
         # continuous variables
@@ -373,8 +424,10 @@ class LoadDataset(Dataset):
 
         # define categorical and continuous embedding sizes
         categorical_column_sizes = [len(data[column].cat.categories) for column in categorical_columns]
+
         self.categorical_embedding_sizes = [(col_size, min(50, (col_size + 1) // 2))
                                             for col_size in categorical_column_sizes]
+
 
         self.num_numerical_cols = self.numerical_data.shape[1]
 

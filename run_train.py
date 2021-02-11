@@ -15,10 +15,12 @@ def train(args, model, device, train_loader,criterion, optimizer, epoch, sigma):
     losses = []
     for _batch_idx, (cats, conts, target) in enumerate(tqdm(train_loader)):
 
+
         cats, conts, target = cats.to(device), conts.to(device), target.to(device)
 
 
         optimizer.zero_grad()
+
         output = model(cats, conts).view(-1)
 
         # Terminate when the model predicts NaN

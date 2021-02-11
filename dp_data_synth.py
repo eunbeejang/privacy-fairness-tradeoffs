@@ -28,7 +28,7 @@ def main():
         "-m",
         "--mode",
         type=str,
-        default="independent",
+        default="correlated",
         help="Synthesizer Mode: 'independent', 'correlated', 'random'",
     )
     parser.add_argument(
@@ -147,7 +147,47 @@ def main():
                                   'y': True}
         output_dir = './german-data/synth'
         sep = ' '
+    elif args.data == 'home':
+        input_file = './home-data/hcdf_train.csv'
 
+        df = pd.read_csv(input_file, sep=',', header=0)
+
+
+        df = df.rename(columns={"TARGET": "y", "CODE_GENDER": "GENDER"})
+
+        categorical_columns = ["NAME_CONTRACT_TYPE", "GENDER",
+                                    "FLAG_OWN_REALTY",
+                                   "NAME_TYPE_SUITE", "NAME_INCOME_TYPE",
+                                   "NAME_EDUCATION_TYPE", "NAME_FAMILY_STATUS",
+                                   "NAME_HOUSING_TYPE", "OCCUPATION_TYPE",
+                                   "WEEKDAY_APPR_PROCESS_START", "ORGANIZATION_TYPE",
+                                   "FONDKAPREMONT_MODE", "HOUSETYPE_MODE",
+                                   "WALLSMATERIAL_MODE", "EMERGENCYSTATE_MODE", "y"]
+
+
+
+        for category in categorical_columns:
+            df[category] = df[category].astype('object')
+
+        categorical_attributes = {"NAME_CONTRACT_TYPE": True,
+                                  "GENDER": True,
+                                  "FLAG_OWN_REALTY": True,
+                                  "NAME_TYPE_SUITE": True,
+                                  "NAME_INCOME_TYPE": True,
+                                  "NAME_EDUCATION_TYPE": True,
+                                  "NAME_FAMILY_STATUS": True,
+                                  "NAME_HOUSING_TYPE": True,
+                                  "OCCUPATION_TYPE": True,
+                                  "WEEKDAY_APPR_PROCESS_START": True,
+                                  "ORGANIZATION_TYPE": True,
+                                  "FONDKAPREMONT_MODE": True,
+                                  "HOUSETYPE_MODE": True,
+                                  "WALLSMATERIAL_MODE": True,
+                                  "EMERGENCYSTATE_MODE": True,
+                                  "y": True
+                                  }
+        output_dir = './home-data/synth'
+        sep = ','
     #df = df.dropna()
 
     # input to DataSynthetizer must be comma separated. Create a temp file.

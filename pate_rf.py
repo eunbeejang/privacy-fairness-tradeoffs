@@ -24,48 +24,17 @@ def mysum(*nums):
 np.set_printoptions(threshold=10_000)
 
 
-classifier=RandomForestClassifier(random_state = random_state)
-classifier=classifier.fit(X, y)
-
-def train(model, train_loader, criterion, optimizer, epochs, device):
-
-    for epoch in range(epochs):
-        losses = []
-        model.train()
-
-        for _batch_idx, (cats, conts, target) in enumerate(tqdm(train_loader)):
-            cats, conts, target = cats.to(device), conts.to(device), target.to(device)
-            optimizer.zero_grad()
-            output = model(cats, conts).view(-1)
-            loss = criterion(output, target)
-            loss.backward()
-            optimizer.step()
-            losses.append(loss.item())
-
-        print(f"Train Epoch: {epoch} \t Loss: {np.mean(losses):.10f}")
-
-
-
-
-
-def predict(model, dataloader, device):
-    outputs = torch.zeros(0, dtype=torch.long)
-    model.eval()
-    with torch.no_grad():
-        for _batch_idx, (cats, conts, target) in enumerate(tqdm(dataloader)):
-            cats, conts, target = cats.to(device), conts.to(device), target.to(device)
-            output = model(cats, conts).view(-1)
-            pred = (output > 0.5).float()
-    return pred
-
 
 def train_models(args, model, teacher_loaders, criterion, optimizer, device):
     num_teachers = args.num_teachers
-    epoch = args.epochs
     models = []
     for i in range(num_teachers):
+        model = RandomForestClassifier(random_state=42, warm_start=True, n_estimators=1)
         print("========== Teacher Model {} ==========".format(i))
-        train(model, teacher_loaders[i], criterion, optimizer, epoch, device)
+        for _, (cats, conts, target) in enumerate(tqdm(teacher_loaders[i])):
+            X = torch.cat((cats, conts), 1)
+            model.fit(X, target)
+            model.n_estimators += 1
         models.append(model)
     return models
 
@@ -74,8 +43,10 @@ def aggregated_teacher(models, dataloader, epsilon, device):
     print("========== Teacher Aggregation ==========")
     preds = torch.torch.zeros((len(models), len(dataloader.dataset)), dtype=torch.long)
     for i, model in enumerate(models):
-        results = predict(model, dataloader, device)
-        preds[i] = results
+        for cats, conts, target in dataloader:
+            X = torch.cat((cats, conts), 1)
+            results = model.predict(X)
+            preds[i] = torch.from_numpy(results)
 
 
     labels = np.array([]).astype(int)
@@ -99,39 +70,17 @@ def student_loader(student_train_loader, labels):
         yield (cats, conts) , torch.from_numpy(labels[i * len(cats): (i + 1) * len(cats)])
 
 def test_student(args, student_train_loader, student_labels, student_test_loader, test_size, cat_emb_size, num_conts, device, sensitive_idx):
-    student_model = RegressionModel(emb_szs=cat_emb_size,
-                    n_cont=num_conts,
-                    emb_drop=0.04,
-                    out_sz=1,
-                    szs=[1000, 500, 250],
-                    drops=[0.001, 0.01, 0.01],
-                    y_range=(0, 1)).to(device)
+    student_model = RandomForestClassifier(random_state=42, warm_start=True, n_estimators=100)
 
-    criterion = nn.BCELoss()
-    optimizer = optim.SGD(student_model.parameters(), lr=args.lr, momentum=0)
-    steps = 0
-    running_loss = 0
-    correct = 0
     print("========== Testing Student Model ==========")
     for epoch in range(args.epochs):
-        student_model.train()
         train_loader = student_loader(student_train_loader, student_labels)
         for (cats, conts) , labels in train_loader:
-        #for _batch_idx, (data, target) in enumerate(tqdm(train_loader)):
-            #cats = data[0]
-            #conts = data[1]
-            steps += 1
+            X = torch.cat((cats, conts), 1)
+            student_model = student_model.fit(X, labels)
 
-            optimizer.zero_grad()
-            output = student_model(cats, conts).view(-1)
-            labels = labels.to(torch.float32)
-            loss = criterion(output, labels)
-            loss.backward()
-            optimizer.step()
-            running_loss += loss.item()
 
-        #            if steps % 50 == 0:
-            student_model.eval()
+
             test_loss = 0
             correct = 0
             i = 0
@@ -151,9 +100,9 @@ def test_student(args, student_train_loader, student_labels, student_test_loader
                 for batch_idx, (cats, conts, target) in enumerate(student_test_loader):
                     print("target\n", sum(target))
                     i+=1
-                    output = student_model(cats, conts)
-                    loss += criterion(output, target).item()
-                    test_loss = test_loss + ((1 / (batch_idx + 1)) * (loss.data - test_loss))
+                    X = torch.cat((cats, conts), 1)
+                    output = student_model.predict(X)
+                    output = torch.from_numpy(output)
                     pred = (output > 0.5).float()
                     print("pred\n", sum(pred))
                     correct += pred.eq(target.view_as(pred)).sum().item()
@@ -192,7 +141,6 @@ def test_student(args, student_train_loader, student_labels, student_test_loader
                             sub_tn, sub_fp, sub_fn, sub_tp = confusion_matrix(sub_tar, sub_pred).ravel()
                         except:
                             # when only one value to predict
-                            print("----WHAT?")
                             temp_tar = int(sub_tar.numpy()[0])
                             temp_pred = int(sub_pred.numpy()[0])
                             # print(tar, pred)
