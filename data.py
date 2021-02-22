@@ -60,13 +60,15 @@ class data_loader():
             if args.dataset == 'german-pre-dp'and s > 0:
                 sep = ','
             else:
+
                 sep = ' '
             train_df = pd.read_csv(train_path, sep=sep, names=cols)
+            print(train_df)
             test_df = pd.read_csv(test_path, sep=' ', names=cols)
 
             train_df['y'] = train_df['y'].apply(lambda x: 0 if x == 2 else 1)
             test_df['y'] = test_df['y'].apply(lambda x: 0 if x == 2 else 1)
-            print(train_df)
+
 
         if args.dataset == 'bank' or args.dataset == 'bank-pre-dp':
             cols = ['age', 'job', 'marital', 'education',
@@ -110,6 +112,7 @@ class data_loader():
 
         train_df = train_df.dropna()
         test_df = test_df.dropna()
+        print(train_df.head())
 
         train_df = train_df.sample(frac=1).reset_index(drop=True)  # shuffle df
         #test_df = test_df.sample(frac=1).reset_index(drop=True)  # shuffle df
@@ -117,6 +120,7 @@ class data_loader():
         if args.num_teachers == 0 or s == 0:
             train_data = LoadDataset(train_df, args.dataset, args.sensitive)
             test_data = LoadDataset(test_df, args.dataset, args.sensitive)
+
 
             self.sensitive_keys = train_data.getkeys()
             self.train_size = len(train_data)
@@ -126,6 +130,8 @@ class data_loader():
             print("***", self.cat_emb_size)
             self.num_conts = train_data.num_numerical_cols  # number of numerical variables
 
+            print(train_df.head(40))
+            print(train_df.y.value_counts())
             class_count = dict(train_df.y.value_counts())
             class_weights = [value / len(train_data) for _, value in class_count.items()]
 

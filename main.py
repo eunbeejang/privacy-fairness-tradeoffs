@@ -8,8 +8,8 @@ from data import data_loader
 from torch import optim
 import torch.nn as nn
 import numpy as np
-#from pate import train_models, aggregated_teacher, test_student
-from pate_rf import train_models, aggregated_teacher, test_student
+from pate import train_models, aggregated_teacher, test_student
+#from pate_rf import train_models, aggregated_teacher, test_student
 
 from sklearn.ensemble import RandomForestClassifier
 
@@ -71,8 +71,8 @@ def main():
     parser.add_argument(
         "--sigma",
         type=list,
-        default=[0, 3.0, 2.85],
-        #default=[0, 3.0, 2.85, 2.6, 2.45, 2.3, 2.15, 2.0, 1.85, 1.6, 1.45, 1.3, 1.15, 1.0, 0.85, 0.6, 0.45, 0.3, 0.15],
+        #default=[3.0, 0.6],
+        default=[0, 3.0, 2.85, 2.6, 2.45, 2.3, 2.15, 2.0, 1.85, 1.6, 1.45, 1.3, 1.15, 1.0, 0.85, 0.6, 0.45, 0.3, 0.15],
         metavar="S",
         help="Noise multiplier (default [0, 0.1, 0.5, 1.0])",
     )
@@ -170,7 +170,7 @@ def main():
 
         #run_results = []
 
-        wandb.init(project="privacy-fairness-2", name=args.run_name,  config={
+        wandb.init(project="project3", name=args.run_name,  config={
             "run_name": args.run_name,
             "architecture": 'RegressionModel',
             "dataset": args.dataset,
@@ -238,9 +238,9 @@ def main():
             accuracy, avg_loss, avg_precision, avg_recall, avg_eq_odds, avg_tpr, avg_dem_par, cm, sub_cm, overall_results = test(args, model, device, test_data, test_size, sensitive_idx)
         else:  # PATE MODEL
             print("!!!!!! ENTERED HERE")
-            model_rf = RandomForestClassifier(random_state=42, warm_start=True)
+            #model_rf = RandomForestClassifier(random_state=42, warm_start=True)
 
-            teacher_models = train_models(args, model_rf, teacher_loaders, criterion, optimizer, device)
+            teacher_models = train_models(args, model, teacher_loaders, criterion, optimizer, device)
             preds, student_labels = aggregated_teacher(teacher_models, student_train_loader, s, device)
 
             accuracy, avg_loss, avg_precision, avg_recall, avg_eq_odds, avg_tpr, avg_dem_par, cm, sub_cm, overall_results = test_student(args, student_train_loader, student_labels, student_test_loader, test_size, cat_emb_size, num_conts,

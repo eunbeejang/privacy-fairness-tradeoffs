@@ -165,7 +165,8 @@ def test_student(args, student_train_loader, student_labels, student_test_loader
                                                 target, pred,
                                                 sensitive_features=sensitive)
 
-
+                    print(target)
+                    print(pred)
                     demographic_parity = flm.demographic_parity_difference(target, pred,
                                                                            sensitive_features=sensitive)
 

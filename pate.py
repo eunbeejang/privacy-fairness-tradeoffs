@@ -24,8 +24,8 @@ def mysum(*nums):
 np.set_printoptions(threshold=10_000)
 
 
-classifier=RandomForestClassifier(random_state = random_state)
-classifier=classifier.fit(X, y)
+#classifier=RandomForestClassifier(random_state = random_state)
+#classifier=classifier.fit(X, y)
 
 def train(model, train_loader, criterion, optimizer, epochs, device):
 
